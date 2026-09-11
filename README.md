@@ -251,6 +251,36 @@ One-line invariant:
 > **Failure can change what the agent does, but never what the agent is allowed to do.**
 
 
+### The product surface (P0)
+
+One AR worker. A dashboard shows the worker doing a job — not a framework:
+
+- `GET /` — dark-theme dashboard: invoices remaining, currently processing,
+  automatically recovered, human escalations, frozen, verified completions
+- Per-invoice lifecycle traces (`failure → classification → recovery →
+  authorization → observation → verdict → final state`)
+- Failure Lab — one-click attack buttons: `503 / 401 / MALFORMED / STALE /
+  CONFLICT / PARTIAL / INFLATED / AUTHORITY WIDENING / FALSE COMPLETION /
+  OSCILLATION`
+- **Real external state** — an authoritative ledger service (`:8001`), a
+  genuinely separate HTTP system the worker queries with real requests.
+  Booted automatically with the API server.
+- **Resume** — kill the worker mid-job; restarting skips completed invoices
+  (persisted per-invoice state + durable idempotency).
+- HERO 1 *False completion*: agent says COMPLETED, authoritative says NOT
+  COMPLETED → runtime **REJECT → FROZEN**.
+- HERO 2 *Authority widening*: recovery requests payroll access →
+  **BLOCKED: AUTHORITY_WIDENING** before any adapter is touched.
+
+Start it with:
+
+```bash
+uvicorn recourse.api.server:app --port 8000   # → http://127.0.0.1:8000
+```
+
+Or via `demo/run_product.py` for a no-browser CLI walkthrough of both heroes.
+
+
 ### Strands is obviously necessary
 
 ```
@@ -330,12 +360,14 @@ We guarantee:
 ### What the test suite proves
 
 ```
-60 passed in 0.74s
+74 passed in 14s
 6 / 6 SECURITY + RECOVERY TESTS PASSED   (original gauntlet)
 8 / 8 LAB ATTACKS BEHAVED AS SPECIFIED     (product Failure Lab)
-60 regression + adversarial + gauntlet tests
+14 / 14 PRODUCT TESTS PASSED               (external ledger, AR worker, dashboard, resume)
 Benchmark PASS  (50 invoices, 96% autonomous, 0 false completions)
 API loop: create → investigate → execute → RESOLVED True
+Live hero paths verified over real HTTP: false completion → FROZEN,
+   authority widening → BLOCKED
 ```
 
 
@@ -404,22 +436,28 @@ MIT — see LICENSE.
 # Install
 pip install -e ".[dev]"
 
-# 1. Run the hero demo — 50 invoices, 6 faults, 96% autonomous
+# 1. Run the product demo — live AR worker against the real external ledger,
+#    then the two hero attacks (false completion → FROZEN, authority → BLOCKED)
+python demo/run_product.py
+
+# 2. Open the worker dashboard — 50 invoices, Failure Lab buttons, live traces
+#    (boots the authoritative ledger on :8001 automatically)
+uvicorn recourse.api.server:app --port 8000
+#    → open http://127.0.0.1:8000
+
+# 3. Run the 50-invoice benchmark — 44 autonomous, 4 self-recovered, 2 escalated
 python demo/benchmark.py
 
-# 2. Run the Failure Lab — 8 adversarial attacks
+# 4. Run the Failure Lab — 8 adversarial attacks
 python demo/failure_lab.py
 
-# 3. Run the original gauntlet (6/6 security+recovery)
+# 5. Run the original gauntlet (6/6 security+recovery)
 python demo/run_failure_gauntlet.py
 
-# 4. Verify the control plane works without AI
+# 6. Verify the whole suite
 pytest -q
 
-# 5. Start the API (optional)
-uvicorn recourse.api.server:app --reload
-
-# 6. Live demo (AWS Bedrock credentials needed)
+# 7. Live Strands demo (AWS Bedrock credentials needed)
 export AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=... AWS_REGION=us-east-1
 python demo/live_agent.py
 ```

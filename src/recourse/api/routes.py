@@ -9,6 +9,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
 from ..adapters.crm import CRMAdapter
@@ -35,6 +36,7 @@ from ..storage.models import (
     save_exception,
 )
 from ..verification.verifier import verify_resolution
+from ..worker.ar_worker import ARWorker
 
 router = APIRouter()
 
@@ -224,3 +226,119 @@ def transition(exc_id: str, body: Transition) -> dict:
         raise HTTPException(400, str(e))
     _persist_case(case)
     return {"state": case.state, "from": frm}
+
+
+# ---------------------------------------------------------------------------
+# AR Worker — the product surface. Uses the real external ledger (HTTP).
+# ---------------------------------------------------------------------------
+
+_worker = ARWorker(use_http_authoritative=True)
+
+
+class AttackReq(BaseModel):
+    invoice_id: str
+    mode: str
+
+
+@router.get("/", response_class=HTMLResponse)
+def dashboard():
+    from .dashboard import render_dashboard
+    return render_dashboard()
+
+
+@router.get("/api/worker/status")
+def worker_status():
+    return _worker.status()
+
+
+@router.post("/api/worker/run")
+def worker_run():
+    run = _worker.run()
+    return {"state": run.state, "counts": _worker.status()["counts"]}
+
+
+@router.post("/api/worker/reset")
+def worker_reset():
+    _worker.reset()
+    return {"ok": True}
+
+
+@router.post("/api/worker/attack")
+def worker_attack(body: AttackReq):
+    _worker.inject_fault(body.invoice_id, body.mode)
+    return {"ok": True, "invoice_id": body.invoice_id, "mode": body.mode}
+
+
+@router.post("/api/worker/authority-attack")
+def worker_authority_attack():
+    """Authority widening demo — shows BLOCKED, no adapter touched."""
+    from ..core.authority import AuthorityScope
+    from ..core.envelopes import RecoveryEnvelope
+    from ..core.capabilities import Capability
+    from ..core.states import CapabilityStatus
+    from ..recovery.executor import execute_recovery, AuthorizationError
+    scope = AuthorityScope.of("fetch_primary")
+    envelope = RecoveryEnvelope(
+        id="env_auth_attack", exception_id="auth_attack",
+        allowed_actions=["fetch_primary", "request_payroll_access"],
+        forbidden_actions=["refund_payment"], max_attempts=3,
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=10))
+    cap = Capability(capability_id="cap_auth_attack",
+                     exception_id="auth_attack",
+                     action="request_payroll_access",
+                     resource="payroll_db",
+                     status=CapabilityStatus.ACTIVE.value,
+                     expires_at=datetime.now(timezone.utc) + timedelta(minutes=10))
+    try:
+        execute_recovery("request_payroll_access", "payroll_db", cap,
+                         envelope, IdempotencyStore(), {}, scope=scope)
+        return {"blocked": False, "reason": "should not reach here"}
+    except AuthorizationError as e:
+        return {"blocked": True, "reason": e.reason}
+
+
+@router.post("/api/worker/false-completion")
+def worker_false_completion():
+    """False completion hero — agent says DONE, verifier says NOT. REJECT → FREEZE."""
+    _worker.reset()
+    _worker.inject_fault("inv_007", "conflict")
+    run = _worker.run()
+    inv = run.items.get("inv_007", "UNKNOWN")
+    return {"invoice": "inv_007", "final_status": inv,
+            "explanation": "Agent said done; authoritative says REFUNDED; REJECT → FREEZE",
+            "run_state": run.state}
+
+
+@router.post("/api/worker/oscillation")
+def worker_oscillation():
+    """Oscillation attack — alternating failures until bounded retry → FREEZE."""
+    from ..workloads.invoices import invoice_ids, ledger_amounts
+    from ..sdk import RecoveryRuntime, Retry, Substitute, Escalate
+    ledger = ledger_amounts(50)
+    ids = invoice_ids(50)
+    from ..workloads.invoices import PrimaryAccounting, AlternateSource
+    target = "inv_007"
+    call_count = {"n": 0}
+    orig = PrimaryAccounting(ledger).fetch
+
+    def oscillating(iid: str) -> dict:
+        if iid == target:
+            call_count["n"] += 1
+            if call_count["n"] % 2 == 1:
+                return {"ok": False, "error": "HTTP_503 SERVICE_UNAVAILABLE",
+                        "tool": "accounting_primary",
+                        "meta": {"source": "accounting_primary"}}
+            return orig(iid)
+        return orig(iid)
+
+    primary = PrimaryAccounting(ledger)
+    primary.fetch = oscillating
+    alternate = AlternateSource(ledger)
+    rt = RecoveryRuntime(scope={"fetch_primary", "fetch_alternate"},
+                         policies=[Retry(2), Substitute(), Escalate()])
+    run = rt.run_items(ids, fetch_primary=primary.fetch,
+                       fetch_alternate=alternate.fetch, expected=ledger,
+                       task="oscillation-test", run_id="lab_oscillation")
+    return {"invoice": target, "final_status": run.items.get(target, "UNKNOWN"),
+            "call_count": call_count["n"],
+            "explanation": "Alternating failures → bounded retries → eventually ESCALATE or FREEZE"}
