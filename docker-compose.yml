@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - RECOURSE_DB_PATH=/data/recourse.db
+    volumes:
+      - recourse-data:/data
+    command: uvicorn recourse.api.server:app --host 0.0.0.0 --port 8000
+volumes:
+  recourse-data:
