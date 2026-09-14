@@ -41,17 +41,16 @@
                   color:var(--ink3);transition:all .15s;position:relative}
 .sidenav .nav-btn:hover{color:var(--ink);background:var(--subtle)}
 .sidenav .nav-btn.active{color:var(--accent);background:var(--accent-soft)}
-.sidenav .nav-icon{width:16px;height:16px;display:block;position:relative}
-.nav-dot{background:var(--currentColor);border-radius:50%}
-.nav-grid{background:var(--currentColor);border-radius:1px;
-          clip-path:polygon(0 0,45% 0,45% 45%,0 45%,0 55%,45% 55%,45% 100%,0 100%,
-                            55% 100%,55% 55%,100% 55%,100% 45%,55% 45%,55% 0,100% 0,100% 100%,0 100%)}
-.nav-slash{background:var(--currentColor);border-radius:1px;transform:rotate(45deg)}
-.nav-diamond{background:var(--currentColor);border-radius:1px;transform:rotate(45deg);width:12px;height:12px}
-.nav-check{border-left:2px solid var(--currentColor);border-bottom:2px solid var(--currentColor);
-           width:10px;height:6px;transform:rotate(-45deg);position:absolute;top:3px;left:1px}
-.nav-up{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;
-        border-bottom:10px solid var(--currentColor);position:absolute;top:1px;left:-1px}
+.sidenav .nav-icon{width:14px;height:14px;display:block;position:relative;flex-shrink:0;
+                   border:2px solid currentColor;border-radius:2px}
+.nav-dot{border-radius:50%}
+.nav-grid{border-radius:0}
+.nav-slash{border:none;width:12px;height:2px;background:currentColor;transform:rotate(45deg);position:absolute;top:6px;left:1px}
+.nav-diamond{border:none;width:10px;height:10px;background:currentColor;transform:rotate(45deg);position:absolute;top:2px;left:2px}
+.nav-check{border:none;border-left:2px solid currentColor;border-bottom:2px solid currentColor;
+           width:8px;height:5px;transform:rotate(-45deg);position:absolute;top:4px;left:3px}
+.nav-up{border:none;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;
+        border-bottom:9px solid currentColor;position:absolute;top:2px;left:1px}
 .sidenav .nav-btn .nav-tooltip{position:absolute;left:52px;top:50%;transform:translateY(-50%);
                                background:var(--ink);color:var(--paper);padding:4px 10px;
                                border-radius:var(--r);font-size:.65rem;white-space:nowrap;
