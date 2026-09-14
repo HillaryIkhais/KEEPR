@@ -589,5 +589,3 @@ export async function refreshStatus() {
     updateTopbar(s);
   } catch (e) { /* silent */ }
 }
-
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
