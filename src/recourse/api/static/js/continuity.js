@@ -229,7 +229,7 @@ export class ContinuityMap {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.W, this.H);
 
-    ctx.fillStyle = '#0D0D0D';
+    ctx.fillStyle = '#FAFAF8';
     ctx.fillRect(0, 0, this.W, this.H);
 
     this._drawZones(ctx);
@@ -243,13 +243,13 @@ export class ContinuityMap {
     const recoveryY = this.H * 0.72;
     const h = 120;
 
-    ctx.fillStyle = 'rgba(255,255,255,0.02)';
+    ctx.fillStyle = 'rgba(0,0,0,0.02)';
     ctx.fillRect(this.W * 0.04, mainY - h/2, this.W * 0.92, h);
 
-    ctx.fillStyle = 'rgba(155,48,255,0.04)';
+    ctx.fillStyle = 'rgba(123,47,214,0.04)';
     ctx.fillRect(this.W * 0.44, recoveryY - 30, this.W * 0.24, 100);
 
-    ctx.strokeStyle = '#222222';
+    ctx.strokeStyle = '#DDDBD4';
     ctx.lineWidth = 1;
     ctx.setLineDash([4, 4]);
     
@@ -275,7 +275,7 @@ export class ContinuityMap {
     
     ctx.setLineDash([]);
 
-    ctx.fillStyle = '#444444';
+    ctx.fillStyle = '#7A786E';
     ctx.font = '11px JetBrains Mono';
     ctx.fillText('QUEUE', this.W * 0.04, mainY - h/2 - 8);
     ctx.fillText('FETCH', this.W * 0.18, mainY - h/2 - 8);
@@ -283,11 +283,11 @@ export class ContinuityMap {
     ctx.fillText('VERIFY', this.W * 0.46, mainY - h/2 - 8);
     ctx.fillText('VERIFIED', this.W * 0.82, mainY - h/2 - 8);
 
-    ctx.fillStyle = '#6B2FA0';
+    ctx.fillStyle = '#7B2FD6';
     ctx.fillText('KEEPR CONTROL PLANE', this.W * 0.46, recoveryY - 38);
 
     if (this.activeException) {
-      ctx.strokeStyle = '#FF2D78';
+      ctx.strokeStyle = '#E03E4A';
       ctx.lineWidth = 2;
       ctx.strokeRect(this.W * 0.44 - 2, recoveryY - 32, this.W * 0.24 + 4, 104);
     }
@@ -300,7 +300,7 @@ export class ContinuityMap {
                    n.state === STATES.RECOVERY_ACTIVE ? 10 : 7;
 
       if (n.state === STATES.FAILED) {
-        ctx.strokeStyle = 'rgba(255, 0, 68, 0.3)';
+        ctx.strokeStyle = 'rgba(224, 62, 74, 0.4)';
         ctx.lineWidth = 2;
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
@@ -315,36 +315,36 @@ export class ContinuityMap {
 
       if (n.state === STATES.PROCESSING || n.state === STATES.FETCHING) {
         const pulse = 0.5 + Math.sin(this.time * 2 + n.idx * 0.5) * 0.5;
-        ctx.fillStyle = `rgba(232, 112, 10, ${pulse * 0.3})`;
+        ctx.fillStyle = `rgba(255, 77, 0, ${pulse * 0.3})`;
         ctx.fillRect(n.x - size/2 - 2, n.y - size/2 - 2, size + 4, size + 4);
       }
 
       if (n.state === STATES.KEEPR || n.state === STATES.CLASSIFYING ||
           n.state === STATES.RECOVERY_ACTIVE) {
         const pulse = 0.5 + Math.sin(this.time * 3 + n.idx) * 0.5;
-        ctx.strokeStyle = `rgba(155, 48, 255, ${0.4 + pulse * 0.4})`;
+        ctx.strokeStyle = `rgba(123, 47, 214, ${0.4 + pulse * 0.4})`;
         ctx.lineWidth = 2;
         ctx.strokeRect(n.x - size/2 - 3, n.y - size/2 - 3, size + 6, size + 6);
       }
 
       if (n.state === STATES.FAILED) {
         const pulse = 0.5 + Math.sin(this.time * 4) * 0.5;
-        ctx.fillStyle = `rgba(255, 0, 68, ${0.2 + pulse * 0.3})`;
+        ctx.fillStyle = `rgba(224, 62, 74, ${0.15 + pulse * 0.2})`;
         ctx.fillRect(n.x - 16, n.y - 16, 32, 32);
         
-        ctx.strokeStyle = '#FF0044';
+        ctx.strokeStyle = '#E03E4A';
         ctx.lineWidth = 2;
         ctx.strokeRect(n.x - 18, n.y - 18, 36, 36);
       }
 
       if (n.flash) {
-        ctx.strokeStyle = '#FFFFFF';
+        ctx.strokeStyle = '#111110';
         ctx.lineWidth = 2;
         ctx.strokeRect(n.x - size/2 - 1, n.y - size/2 - 1, size + 2, size + 2);
       }
 
       if (n.state === STATES.FROZEN) {
-        ctx.strokeStyle = '#CC0000';
+        ctx.strokeStyle = '#E03E4A';
         ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.moveTo(n.x - 6, n.y - 6);
@@ -355,7 +355,7 @@ export class ContinuityMap {
       }
 
       if (n.state === STATES.ESCALATED) {
-        ctx.strokeStyle = '#FFB800';
+        ctx.strokeStyle = '#D99E00';
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(n.x, n.y, size/2 + 4, 0, Math.PI * 2);
@@ -389,27 +389,27 @@ export class ContinuityMap {
     const w = this.W * 0.36;
     const h = 80;
 
-    ctx.fillStyle = `rgba(255, 0, 68, ${0.08 * fadeIn})`;
+    ctx.fillStyle = `rgba(224, 62, 74, ${0.06 * fadeIn})`;
     ctx.fillRect(x, y, w, h);
 
-    ctx.strokeStyle = `rgba(255, 45, 120, ${0.6 * fadeIn})`;
+    ctx.strokeStyle = `rgba(224, 62, 74, ${0.6 * fadeIn})`;
     ctx.lineWidth = 2;
     ctx.strokeRect(x, y, w, h);
 
-    ctx.fillStyle = `rgba(255, 255, 255, ${0.9 * fadeIn})`;
+    ctx.fillStyle = `rgba(17, 17, 16, ${0.9 * fadeIn})`;
     ctx.font = 'bold 12px JetBrains Mono';
     ctx.fillText('ACTIVE EXCEPTION', x + 12, y + 20);
 
-    ctx.fillStyle = `rgba(255, 45, 120, ${0.9 * fadeIn})`;
+    ctx.fillStyle = `rgba(224, 62, 74, ${0.9 * fadeIn})`;
     ctx.font = 'bold 14px JetBrains Mono';
     ctx.fillText(ex.iid.toUpperCase(), x + 12, y + 40);
 
-    ctx.fillStyle = `rgba(255, 255, 255, ${0.7 * fadeIn})`;
+    ctx.fillStyle = `rgba(58, 58, 54, ${0.9 * fadeIn})`;
     ctx.font = '11px JetBrains Mono';
     ctx.fillText(ex.mode || 'SERVICE FAILURE', x + 12, y + 58);
 
     const stateText = this._stateLabel(ex.state);
-    ctx.fillStyle = '#9B30FF';
+    ctx.fillStyle = '#7B2FD6';
     ctx.fillText(stateText, x + 12, y + 72);
   }
 
