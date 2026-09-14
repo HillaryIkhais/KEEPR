@@ -10,3 +10,5 @@ recourse.db
 .env
 .data/
 .DS_Store
+meld/
+meld/node_modules/

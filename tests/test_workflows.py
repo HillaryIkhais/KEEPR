@@ -111,6 +111,14 @@ def test_auth_failure_escalates_without_retry():
     assert sum(1 for s in out.items.values() if s == ITEM_COMPLETED) == 4
 
 
+def test_partial_result_default_chain_includes_rollback():
+    from recourse.failures.selector import DEFAULT_CHAINS, next_action
+    chain = DEFAULT_CHAINS["PARTIAL_RESULT"]
+    assert "rollback" in chain
+    assert chain.index("rollback") < chain.index("escalate")
+    assert next_action("PARTIAL_RESULT", 1) == "rollback"
+
+
 def test_runtime_without_substitute_escalates():
     ledger = ledger_amounts(5)
     primary = PrimaryAccounting(ledger, faults={"inv_002": "http_503"})

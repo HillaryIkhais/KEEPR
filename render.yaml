@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: keepr
+    runtime: docker
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+    healthCheckPath: /
+    autoDeploy: true

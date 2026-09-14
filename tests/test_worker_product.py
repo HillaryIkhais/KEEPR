@@ -186,8 +186,8 @@ def test_worker_resume_freeze_restores():
 def test_api_serves_dashboard(api_client):
     r = api_client.get("/")
     assert r.status_code == 200
-    assert "RECOURSE" in r.text
-    assert "Failure Lab" in r.text
+    assert "KEEPR" in r.text
+    assert "Break the Job" in r.text
     assert "No-Human" in r.text
 
 

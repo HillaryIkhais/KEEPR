@@ -228,6 +228,8 @@ class ARWorker:
             "job_id": JOB_ID,
             "counts": dict(self._status_counts),
             "run_state": self._run.state if self._run else None,
+            "paused": self._paused,
+            "scope": sorted(self._scope()),
             "invoices": {
                 iid: {
                     "status": (self._run.items.get(iid, "PENDING")
@@ -236,6 +238,7 @@ class ARWorker:
                                  if self._run else 0),
                     "recovery_mode": self._recovery_mode(iid, self._run)
                         if self._run else None,
+                    "amount": self.ledger.get(iid, 0),
                     "trace": self._traces.get(iid, []),
                 }
                 for iid in self.ids

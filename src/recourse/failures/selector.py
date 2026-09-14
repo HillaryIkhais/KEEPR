@@ -25,7 +25,7 @@ DEFAULT_CHAINS: dict[str, list[str]] = {
     FailureClass.TOOL_UNAVAILABLE.value: [RETRY, SUBSTITUTE, ESCALATE],
     FailureClass.MALFORMED_OUTPUT.value: [REJECT, SUBSTITUTE, ESCALATE],
     FailureClass.STALE_DATA.value: [SUBSTITUTE, ESCALATE],
-    FailureClass.PARTIAL_RESULT.value: [RETRY_REMAINDER, ESCALATE],
+    FailureClass.PARTIAL_RESULT.value: [RETRY_REMAINDER, ROLLBACK, ESCALATE],
     FailureClass.CONFLICTING_RESULT.value: [FREEZE],
     FailureClass.AUTHENTICATION.value: [ESCALATE],
     FailureClass.AUTHORIZATION.value: [ESCALATE],

@@ -7,9 +7,10 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
-from fastapi import APIRouter, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel, Field
 
 from ..adapters.crm import CRMAdapter
@@ -240,8 +241,26 @@ class AttackReq(BaseModel):
     mode: str
 
 
+_STATIC_DIR = Path(__file__).parent / "static"
+
+
 @router.get("/", response_class=HTMLResponse)
-def dashboard():
+def landing_root():
+    return FileResponse(_STATIC_DIR / "index.html")
+
+
+@router.get("/app", response_class=HTMLResponse)
+def workspace():
+    return FileResponse(_STATIC_DIR / "app.html")
+
+
+@router.get("/landing", response_class=HTMLResponse)
+def landing_page():
+    return FileResponse(_STATIC_DIR / "index.html")
+
+
+@router.get("/dashboard", response_class=HTMLResponse)
+def legacy_dashboard():
     from .dashboard import render_dashboard
     return render_dashboard()
 
@@ -252,8 +271,8 @@ def worker_status():
 
 
 @router.post("/api/worker/run")
-def worker_run():
-    run = _worker.run()
+def worker_run(max: int | None = Query(None)):
+    run = _worker.run(max_invoices=max)
     return {"state": run.state, "counts": _worker.status()["counts"]}
 
 
@@ -261,6 +280,18 @@ def worker_run():
 def worker_reset():
     _worker.reset()
     return {"ok": True}
+
+
+@router.post("/api/worker/pause")
+def worker_pause():
+    _worker.pause()
+    return {"ok": True, "paused": True}
+
+
+@router.post("/api/worker/resume")
+def worker_resume():
+    _worker.resume()
+    return {"ok": True, "paused": False}
 
 
 @router.post("/api/worker/attack")
@@ -304,9 +335,16 @@ def worker_false_completion():
     _worker.inject_fault("inv_007", "conflict")
     run = _worker.run()
     inv = run.items.get("inv_007", "UNKNOWN")
-    return {"invoice": "inv_007", "final_status": inv,
-            "explanation": "Agent said done; authoritative says REFUNDED; REJECT → FREEZE",
-            "run_state": run.state}
+    ledger = _worker.ledger
+    return {
+        "invoice": "inv_007",
+        "amount": ledger.get("inv_007", 0),
+        "agent_claim": "COMPLETED",
+        "observed_state": "REFUNDED",
+        "final_status": inv,
+        "explanation": "Agent said done; authoritative says REFUNDED; REJECT → FREEZE",
+        "run_state": run.state,
+    }
 
 
 @router.post("/api/worker/oscillation")

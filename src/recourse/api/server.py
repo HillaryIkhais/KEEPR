@@ -9,12 +9,15 @@ from __future__ import annotations
 
 import threading
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from .routes import router
 
 _ledger_started = False
+_STATIC_DIR = Path(__file__).parent / "static"
 
 
 def _start_ledger_background():
@@ -33,7 +36,7 @@ def _start_ledger_background():
         t = threading.Thread(target=_run, daemon=True)
         t.start()
         import time
-        time.sleep(0.2)  # give the ledger server a moment to bind
+        time.sleep(0.2)
     except Exception:
         pass
 
@@ -44,7 +47,9 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="RECOURSE",
+app = FastAPI(title="KEEPR",
               description="Autonomous recovery control plane.",
               lifespan=lifespan)
+
 app.include_router(router)
+app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")

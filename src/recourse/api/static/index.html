@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>KEEPR — Recover the Work. Not the Human.</title>
+<link rel="stylesheet" href="/static/css/keepr.css"/>
+<link rel="stylesheet" href="/static/css/landing.css"/>
+</head>
+<body>
+<nav class="l-nav">
+  <div class="logo">
+    <div class="logo-mark">K</div>
+    <div><div class="logo-name">KEEPR</div><div class="logo-sub">Autonomous Recovery</div></div>
+  </div>
+  <div class="links">
+    <a href="#boundary">How It Works</a>
+    <a href="#behaviors">Capabilities</a>
+    <a href="#lab-demo">Break the Job</a>
+    <a href="#proof">Live Proof</a>
+    <a href="/app">Enter Workspace →</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-left">
+    <h1 class="hero-title">
+      Don't turn an exception into <span class="accent">a human job.</span>
+      <span class="mirror-line" aria-hidden="true">A HUMAN JOB.</span>
+    </h1>
+    <p class="hero-sub">
+      An autonomous worker shouldn't lose an entire job because one transaction failed.
+      <strong>KEEPR</strong> isolates the failure, recovers what it safely can, verifies the outcome,
+      and keeps the rest of the job moving without expanding the worker's authority.
+    </p>
+    <div class="hero-ctas">
+      <a href="/app" class="btn btn-primary">Open Workspace</a>
+      <a href="#boundary" class="btn btn-outline">See How It Works</a>
+    </div>
+  </div>
+  <div class="hero-canvas-wrap" id="hero-scene">
+    <div class="hero-fallback" id="hero-fallback" style="display:none">
+      <div class="fb-ring fb-ring2"></div><div class="fb-ring"></div><div class="fb-core"></div>
+    </div>
+    <div class="story-captions" id="story-captions">
+      <div class="story-label">Autonomous worker flow</div>
+      <div class="story-btns" id="story-btns">
+        <button class="story-btn active" data-story="normal">Normal</button>
+        <button class="story-btn" data-story="failure">Failure → Recover</button>
+        <button class="story-btn" data-story="unsafe">Authority Blocked</button>
+        <button class="story-btn" data-story="false">False Completion</button>
+      </div>
+      <div class="story-title" id="story-title">Invoice → Worker → Action → Verify → Resolved</div>
+      <div id="story-desc">Normal autonomous flow. Every invoice verified against authoritative state.</div>
+    </div>
+  </div>
+</section>
+
+<section class="boundary-section reveal" id="boundary">
+  <div class="boundary-header">
+    <h2>The Recovery Boundary</h2>
+    <p>One failure shouldn't hand the entire job back to a human. KEEPR recovers what it safely can, proves what happened, and stops when it can't.</p>
+  </div>
+  <div class="boundary-flow">
+    <div class="bf-node"><div class="bf-label">Input</div><div class="bf-name">Invoice</div></div>
+    <div class="bf-arrow anim"></div>
+    <div class="bf-node"><div class="bf-label">Worker</div><div class="bf-name">Action</div></div>
+    <div class="bf-arrow anim"></div>
+    <div class="bf-node bf-keeper"><div class="bf-label">KEEPR</div><div class="bf-name">Recover → Verify</div></div>
+    <div class="bf-arrow anim"></div>
+    <div class="bf-node"><div class="bf-label">Output</div><div class="bf-name">Verified</div></div>
+  </div>
+</section>
+
+<section class="behaviors reveal" id="behaviors">
+  <div class="behaviors-header">
+    <h2 id="lab-demo">Break the Job</h2>
+    <p style="color:var(--ink3);max-width:500px;margin:0 auto;font-size:.9rem">Each failure class gets a bounded, deterministic recovery policy. The other 49 invoices don't become a human job.</p>
+  </div>
+  <div class="behaviors-grid">
+    <div class="behavior-card">
+      <div class="bc-icon" style="background:var(--green-soft);color:var(--green)">⚡</div>
+      <div class="bc-trigger">503 Service Failure</div>
+      <div class="bc-name">Transaction Isolated</div>
+      <div class="bc-desc">One invoice fails. Bounded retry with substitute fallback. Job continues. 49 others unaffected.</div>
+    </div>
+    <div class="behavior-card">
+      <div class="bc-icon" style="background:var(--accent-soft);color:var(--accent)">⊘</div>
+      <div class="bc-trigger">Malformed Response</div>
+      <div class="bc-name">Poisoned Data Rejected</div>
+      <div class="bc-desc">Schema-first validation catches bad data before it corrupts the job. Alternate source used.</div>
+    </div>
+    <div class="behavior-card">
+      <div class="bc-icon" style="background:var(--yellow-soft);color:var(--yellow)">⊘</div>
+      <div class="bc-trigger">401 Unauthorized</div>
+      <div class="bc-name">Escalated Immediately</div>
+      <div class="bc-desc">Authentication failures are never retried. Human judgment required — escalated with full evidence.</div>
+    </div>
+    <div class="behavior-card">
+      <div class="bc-icon" style="background:var(--green-soft);color:var(--green)">↺</div>
+      <div class="bc-trigger">Partial Result</div>
+      <div class="bc-name">Rolled Back Safely</div>
+      <div class="bc-desc">Incomplete work undone via compensating actions. Item restored to PENDING. Job resumes.</div>
+    </div>
+    <div class="behavior-card">
+      <div class="bc-icon" style="background:var(--red-soft);color:var(--red)">⊘</div>
+      <div class="bc-trigger">False Completion</div>
+      <div class="bc-name">Claim Rejected → Frozen</div>
+      <div class="bc-desc">Agent claims DONE. Ledger disagrees. KEEPR rejects, rolls back, freezes. The other 49 continue.</div>
+    </div>
+    <div class="behavior-card">
+      <div class="bc-icon" style="background:var(--red-soft);color:var(--red)">⊘</div>
+      <div class="bc-trigger">Authority Widening</div>
+      <div class="bc-name">Blocked Before Execution</div>
+      <div class="bc-desc">Out-of-scope request intercepted before any adapter is touched. Recovery cannot expand power.</div>
+    </div>
+    <div class="behavior-card">
+      <div class="bc-icon" style="background:var(--purple-soft);color:var(--purple)">⊘</div>
+      <div class="bc-trigger">Conflicting Sources</div>
+      <div class="bc-name">Frozen — Halted</div>
+      <div class="bc-desc">Unresolvable contradiction. This item frozen. Human adjudication required. Rest of job preserved.</div>
+    </div>
+  </div>
+</section>
+
+<section class="proof reveal" id="proof">
+  <h2>The Moment That Matters</h2>
+  <p style="color:var(--ink4);max-width:540px;margin:0 auto;font-size:.88rem">50 invoices. One fails. KEEPR contains it. The other 49 don't become a human job.</p>
+  <div class="proof-stats" id="proof-stats">
+    <div class="ps"><div class="ps-val" id="ps-total">50</div><div class="ps-lbl">Work Items</div></div>
+    <div class="ps"><div class="ps-val" id="ps-rate">—</div><div class="ps-lbl">No-Human Rate</div></div>
+    <div class="ps"><div class="ps-val" id="ps-recovered">—</div><div class="ps-lbl">KEEPR Recovered</div></div>
+    <div class="ps"><div class="ps-val" id="ps-escalated">—</div><div class="ps-lbl">Human Decisions Required</div></div>
+  </div>
+  <div style="margin:2rem 0;font-family:var(--mono);font-size:1.1rem;color:rgba(255,255,255,.4);letter-spacing:.1em">
+    INVOICE FAILS → KEEPR CONTAINS → <span style="color:var(--accent)">49 CONTINUE</span>
+  </div>
+  <div class="proof-cta"><a href="/app" class="btn btn-primary">Open Workspace</a></div>
+</section>
+
+<footer class="l-footer">
+  <span>KEEPR — Recover the work safely. Not the human.</span>
+  <div><a href="/app">Workspace</a><a href="#boundary">How It Works</a><a href="#behaviors">Capabilities</a></div>
+</footer>
+
+<script type="module" src="/static/js/landing.js"></script>
+</body>
+</html>
