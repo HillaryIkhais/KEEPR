@@ -9,6 +9,7 @@ export class WorkField {
     this.W = 0; this.H = 0;
     this.time = 0;
     this.lastStatus = {};
+    this.recoveryTimes = {};
     
     this._resize();
     window.addEventListener('resize', () => this._resize());
@@ -35,6 +36,7 @@ export class WorkField {
 
   update(invoices) {
     const invs = invoices || {};
+    const now = Date.now();
     const newNodes = [];
     
     for (const [iid, info] of Object.entries(invs)) {
@@ -42,16 +44,32 @@ export class WorkField {
       const prev = this.lastStatus[iid];
       const existing = this.nodes.find(n => n.iid === iid);
       
+      // Track recovery start
+      if (info.attempts > 0 && prev && prev.status !== status && status === 'VERIFIED') {
+        this.recoveryTimes[iid] = now;
+      }
+      
+      // Show KEEPR for 2 seconds after recovery
+      let displayStatus = status;
+      if (status === 'VERIFIED' && info.attempts > 0 && this.recoveryTimes[iid]) {
+        const timeSinceRecovery = now - this.recoveryTimes[iid];
+        if (timeSinceRecovery < 2000) {
+          displayStatus = 'KEEPR';
+        } else {
+          delete this.recoveryTimes[iid];
+        }
+      }
+      
       const idx = this.nodes.indexOf(existing) !== -1 ? 
                   this.nodes.indexOf(existing) : Object.keys(invs).indexOf(iid);
       
       newNodes.push({
         iid,
         idx,
-        status,
+        status: displayStatus,
         attempts: info.attempts || 0,
-        x: existing ? existing.x : this._targetX(idx, status),
-        y: existing ? existing.y : this._targetY(status, idx),
+        x: existing ? existing.x : this._targetX(idx, displayStatus),
+        y: existing ? existing.y : this._targetY(displayStatus, idx),
         justChanged: prev && prev.status !== status
       });
     }
@@ -65,7 +83,7 @@ export class WorkField {
   }
 
   _normalizeStatus(st, attempts) {
-    if (st === 'COMPLETED' && attempts > 0) return 'RECOVERED';
+    if (st === 'COMPLETED' && attempts > 0) return 'VERIFIED';
     if (st === 'COMPLETED') return 'VERIFIED';
     if (st === 'PENDING') return 'PENDING';
     if (st === 'ESCALATED') return 'ESCALATED';
@@ -99,11 +117,9 @@ export class WorkField {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.W, this.H);
     
-    /* Background — dark */
     ctx.fillStyle = '#0A0A0A';
     ctx.fillRect(0, 0, this.W, this.H);
 
-    /* Zone labels */
     ctx.fillStyle = '#888888';
     ctx.font = 'bold 13px JetBrains Mono';
     ctx.fillText('QUEUE', 40, 45);
@@ -112,7 +128,6 @@ export class WorkField {
     ctx.fillText('VERIFY', this.W * 0.82, 45);
     ctx.fillText('VERIFIED', this.W - 90, 45);
 
-    /* Separator lines */
     ctx.strokeStyle = 'rgba(255,255,255,0.08)';
     ctx.lineWidth = 1;
     for (let i = 1; i < 5; i++) {
@@ -123,7 +138,6 @@ export class WorkField {
       ctx.stroke();
     }
 
-    /* Nodes */
     for (const n of this.nodes) {
       const targetX = this._targetX(n.idx, n.status);
       const targetY = this._targetY(n.status, n.idx);
@@ -147,7 +161,6 @@ export class WorkField {
       ctx.roundRect(n.x - 8, n.y - 8, 16, 16, 3);
       ctx.fill();
 
-      /* Glow for active states */
       if (n.status === 'KEEPR' || n.status === 'PROCESSING') {
         ctx.shadowColor = color;
         ctx.shadowBlur = 15;
@@ -157,5 +170,6 @@ export class WorkField {
         ctx.fill();
         ctx.shadowBlur = 0;
       }
+    }
   }
 }
