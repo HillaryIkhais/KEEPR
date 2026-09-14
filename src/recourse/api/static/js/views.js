@@ -60,27 +60,35 @@ function handleReset() { resetWorker().then(() => refreshStatus()).catch(()=>{})
 async function runChunked() {
   const msg = $('#run-msg');
   msg.textContent = 'Starting...';
-  let lastState = '';
+  let faultInjected = false;
+  let processed = 0;
   try {
     while (true) {
       const s = await getStatus();
       if (s.paused) { msg.textContent = 'Paused.'; return; }
-      if (s.run_state === 'FROZEN') { msg.textContent = 'Workflow frozen.'; return; }
-      const pending = (s.counts.pending || 0);
-      if (pending === 0 && lastState) { msg.textContent = 'Complete.'; return; }
-      if (pending === 0 && !lastState) {
-        await runWorker(5);
-        lastState = 'started';
+      if (s.run_state === 'FROZEN') { msg.textContent = 'Frozen.'; return; }
+      const pending = s.counts.pending || 0;
+      if (pending === 0) { msg.textContent = `Complete. ${processed} processed.`; return; }
+
+      /* Auto-inject a failure on inv_007 after 5 invoices — so the demo always shows recovery */
+      if (!faultInjected && processed >= 5) {
+        faultInjected = true;
+        await injectFault('inv_007', '503');
+        msg.textContent = 'Processing... fault injected on inv_007';
         await refreshStatus();
-        continue;
+        await sleep(600);
       }
-      msg.textContent = `Processing... ${50 - pending}/50`;
-      await runWorker(5);
-      lastState = 'started';
+
+      msg.textContent = `Processing... ${processed + 1}/50`;
+      await runWorker(1);
+      processed++;
       await refreshStatus();
+      await sleep(400);
     }
   } catch (e) { msg.textContent = 'Error: ' + e.message; }
 }
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 /* ── Work ── */
 let _workFilter = 'ALL';
