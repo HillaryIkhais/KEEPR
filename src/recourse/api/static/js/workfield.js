@@ -71,11 +71,10 @@ export class WorkField {
       const col = idx % 6, row = Math.floor(idx / 6);
       return { x: (z.x1 + .02 + col * .025) * W, y: (z.y1 + .08 + row * .06) * H };
     }
-    // Zone-based target for other states
     let zone;
     if (status === 'COMPLETED' || status === 'RECOVERED') zone = this.zones[4];
     else if (status === 'PENDING') zone = this.zones[0];
-    else zone = this.zones[2]; // active/recovering → center
+    else zone = this.zones[2];
 
     const x1 = zone.x1 * W + pad, x2 = zone.x2 * W - pad;
     const y1 = pad + 10, y2 = H - pad - 10;
@@ -100,7 +99,7 @@ export class WorkField {
         iid, idx: i, status: info.status || 'PENDING', attempts: newAttempts,
         amount: info.amount || 0, recovery_mode: info.recovery_mode,
         x: existing ? existing.x : 0, y: existing ? existing.y : 0,
-        tx: 0, ty: 0, flash: flash ? 1 : (existing ? existing.flash * .94 : 0),
+        tx: 0, ty: 0, flash: flash ? 1 : (existing ? existing.flash * .88 : 0),
         _initialized: existing ? existing._initialized : false
       };
     });
@@ -112,108 +111,107 @@ export class WorkField {
     const ctx = this.ctx, W = this.W, H = this.H;
     ctx.clearRect(0, 0, W, H);
 
-    // Background
-    ctx.fillStyle = '#faf9f6';
+    /* Background */
+    ctx.fillStyle = '#f5f5f3';
     ctx.fillRect(0, 0, W, H);
 
-    // Zone backgrounds
+    /* Zone backgrounds */
     for (const z of this.zones) {
-      ctx.fillStyle = 'rgba(0,0,0,.015)';
+      ctx.fillStyle = 'rgba(0,0,0,.025)';
       ctx.fillRect(z.x1 * W, 0, (z.x2 - z.x1) * W, H);
-      ctx.fillStyle = 'rgba(0,0,0,.25)';
-      ctx.font = `600 ${this.large ? 9 : 7}px 'JetBrains Mono',monospace`;
+      ctx.fillStyle = 'rgba(0,0,0,.3)';
+      ctx.font = `600 ${this.large ? 8 : 7}px 'JetBrains Mono',monospace`;
       ctx.textAlign = 'center';
       ctx.fillText(z.label, ((z.x1 + z.x2) / 2) * W, H - 8);
     }
 
-    // Escalated zone
-    ctx.fillStyle = 'rgba(217,158,0,.04)';
+    /* Escalated zone */
+    ctx.fillStyle = 'rgba(217,158,0,.03)';
     ctx.fillRect(this.escZone.x1 * W, this.escZone.y1 * H,
       (this.escZone.x2 - this.escZone.x1) * W, (this.escZone.y2 - this.escZone.y1) * H);
-    ctx.strokeStyle = 'rgba(217,158,0,.15)';
-    ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = 'rgba(217,158,0,.2)';
+    ctx.lineWidth = 1; ctx.setLineDash([]);
     ctx.strokeRect(this.escZone.x1 * W, this.escZone.y1 * H,
       (this.escZone.x2 - this.escZone.x1) * W, (this.escZone.y2 - this.escZone.y1) * H);
-    ctx.setLineDash([]);
     ctx.fillStyle = 'rgba(217,158,0,.4)';
-    ctx.font = `600 ${this.large ? 9 : 7}px 'JetBrains Mono',monospace`;
+    ctx.font = `600 ${this.large ? 8 : 7}px 'JetBrains Mono',monospace`;
     ctx.textAlign = 'center';
     ctx.fillText(this.escZone.label, ((this.escZone.x1 + this.escZone.x2) / 2) * W,
       this.escZone.y1 * H + 14);
 
-    // Frozen zone
-    ctx.fillStyle = 'rgba(123,47,214,.04)';
+    /* Frozen zone */
+    ctx.fillStyle = 'rgba(123,47,214,.03)';
     ctx.fillRect(this.fzZone.x1 * W, this.fzZone.y1 * H,
       (this.fzZone.x2 - this.fzZone.x1) * W, (this.fzZone.y2 - this.fzZone.y1) * H);
-    ctx.strokeStyle = 'rgba(123,47,214,.15)';
-    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = 'rgba(123,47,214,.2)';
+    ctx.setLineDash([]);
     ctx.strokeRect(this.fzZone.x1 * W, this.fzZone.y1 * H,
       (this.fzZone.x2 - this.fzZone.x1) * W, (this.fzZone.y2 - this.fzZone.y1) * H);
-    ctx.setLineDash([]);
     ctx.fillStyle = 'rgba(123,47,214,.4)';
     ctx.fillText(this.fzZone.label, ((this.fzZone.x1 + this.fzZone.x2) / 2) * W,
       this.fzZone.y1 * H + 14);
 
-    // Pipeline arrows (faint)
-    ctx.strokeStyle = 'rgba(0,0,0,.06)';
+    /* Pipeline dividers */
+    ctx.strokeStyle = 'rgba(0,0,0,.08)';
     ctx.lineWidth = 1;
-    for (let i = 0; i < this.zones.length - 1; i++) {
-      const x = this.zones[i].x2 * W;
-      ctx.beginPath(); ctx.moveTo(x, H / 2 - 6); ctx.lineTo(x + 12, H / 2); ctx.lineTo(x, H / 2 + 6); ctx.stroke();
+    for (let i = 1; i < this.zones.length; i++) {
+      const x = this.zones[i].x1 * W;
+      ctx.beginPath(); ctx.moveTo(x, 8); ctx.lineTo(x, H - 20); ctx.stroke();
     }
 
-    // Nodes
-    const r = this.large ? 6 : 5;
+    /* Nodes — rounded rectangles */
+    const sz = this.large ? 10 : 8;
+    const r = 2;
     for (const n of this.nodes) {
-      // Animate toward target
       n.x += (n.tx - n.x) * .1;
       n.y += (n.ty - n.y) * .1;
 
       const color = COLORS[n.status] || COLORS.PENDING;
-      ctx.beginPath();
-      ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+      const flashAlpha = n.flash > .05 ? n.flash : 0;
+
+      /* Flash — brief white overlay, no expanding ring */
+      if (flashAlpha > .05) {
+        ctx.fillStyle = `rgba(255,255,255,${flashAlpha * .6})`;
+        ctx.beginPath();
+        ctx.roundRect(n.x - sz / 2 - 2, n.y - sz / 2 - 2, sz + 4, sz + 4, r + 1);
+        ctx.fill();
+      }
+
+      /* Main rect */
       ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.roundRect(n.x - sz / 2, n.y - sz / 2, sz, sz, r);
       ctx.fill();
 
-      // Flash ring
-      if (n.flash > .05) {
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, r + 4 * n.flash, 0, Math.PI * 2);
-        ctx.strokeStyle = color;
-        ctx.globalAlpha = n.flash * .5;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.globalAlpha = 1;
-        n.flash *= .94;
-      }
-
-      // Selected ring
+      /* Selected border */
       if (n.iid === this.selectedIid) {
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, r + 3, 0, Math.PI * 2);
         ctx.strokeStyle = '#FF4D00';
         ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(n.x - sz / 2 - 3, n.y - sz / 2 - 3, sz + 6, sz + 6, r + 1);
         ctx.stroke();
       }
 
-      // Frozen lock icon
+      /* Frozen indicator — small purple border ring, no text */
       if (n.status === 'FROZEN') {
-        ctx.fillStyle = '#fff';
-        ctx.font = `bold ${r + 2}px 'JetBrains Mono',monospace`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('⊘', n.x, n.y);
+        ctx.strokeStyle = 'rgba(123,47,214,.6)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(n.x - sz / 2 - 2, n.y - sz / 2 - 2, sz + 4, sz + 4, r + 1);
+        ctx.stroke();
       }
+
+      n.flash *= .88;
     }
   }
 
   _onMouseMove(e) {
     const rect = this.canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-    const r = this.large ? 8 : 6;
+    const hitR = this.large ? 10 : 8;
     let hit = null;
     for (const n of this.nodes) {
-      if (Math.hypot(n.x - mx, n.y - my) < r + 4) { hit = n; break; }
+      if (Math.abs(n.x - mx) < hitR && Math.abs(n.y - my) < hitR) { hit = n; break; }
     }
     this.onHover(hit ? {
       iid: hit.iid, x: e.clientX, y: e.clientY,
@@ -225,9 +223,9 @@ export class WorkField {
   _onClick(e) {
     const rect = this.canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-    const r = this.large ? 8 : 6;
+    const hitR = this.large ? 10 : 8;
     for (const n of this.nodes) {
-      if (Math.hypot(n.x - mx, n.y - my) < r + 4) {
+      if (Math.abs(n.x - mx) < hitR && Math.abs(n.y - my) < hitR) {
         this.selectedIid = n.iid;
         this.onSelect(n.iid);
         this._draw();

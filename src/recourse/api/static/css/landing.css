@@ -1,13 +1,12 @@
 .l-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;
        justify-content:space-between;padding:1rem 2.5rem;
-       background:rgba(244,243,238,.88);backdrop-filter:blur(20px);
+       background:rgba(242,242,240,.9);backdrop-filter:blur(20px);
        border-bottom:1px solid var(--card-border)}
 .l-nav .logo{display:flex;align-items:center;gap:.7rem}
-.l-nav .logo-mark{width:34px;height:34px;background:var(--accent);border-radius:8px;
+.l-nav .logo-mark{width:32px;height:32px;background:var(--accent);border-radius:var(--r);
                   display:flex;align-items:center;justify-content:center;color:#fff;
-                  font-weight:700;font-size:.82rem;box-shadow:0 2px 10px rgba(255,77,0,.25);
-                  transition:transform .3s}
-.l-nav .logo-mark:hover{transform:rotate(-8deg) scale(1.06)}
+                  font-weight:700;font-size:.8rem;transition:opacity .2s}
+.l-nav .logo-mark:hover{opacity:.85}
 .l-nav .logo-name{font-weight:700;font-size:1rem;letter-spacing:.08em}
 .l-nav .logo-sub{font-size:.55rem;text-transform:uppercase;letter-spacing:.15em;color:var(--ink3);margin-top:-1px}
 .l-nav .links{display:flex;gap:2rem;align-items:center}
@@ -23,7 +22,7 @@
 .hero-title{font-size:clamp(2.6rem,7vw,5.8rem);font-weight:700;line-height:.88;letter-spacing:-.04em}
 .hero-title .accent{color:var(--accent);display:inline-block;position:relative}
 .hero-title .accent::after{content:'';position:absolute;bottom:2px;left:0;width:100%;
-                           height:4px;background:var(--accent);border-radius:2px;
+                           height:4px;background:var(--accent);border-radius:1px;
                            transform:scaleX(0);transform-origin:left;transition:transform .6s cubic-bezier(.4,0,.2,1)}
 .hero-title:hover .accent::after{transform:scaleX(1)}
 .hero-title .mirror-line{display:block;font-size:clamp(2rem,5.5vw,4.4rem);
@@ -38,15 +37,16 @@
 .hero-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
                background:var(--card);border:1px solid var(--card-border);border-radius:var(--r3);
                perspective:600px;position:relative;overflow:hidden}
-.hero-fallback .fb-core{width:100px;height:100px;border:2px solid var(--accent);border-radius:16px;
-                        animation:breathe 4s ease-in-out infinite;position:relative;
-                        transform:rotateX(15deg) rotateY(-10deg);transform-style:preserve-3d}
+.hero-fallback .fb-core{width:100px;height:100px;border:2px solid var(--accent);border-radius:var(--r2);
+                        position:relative;transform:rotateX(15deg) rotateY(-10deg);transform-style:preserve-3d;
+                        animation:fbPulse 3s ease-in-out infinite}
+@keyframes fbPulse{0%,100%{opacity:1}50%{opacity:.7}}
 .hero-fallback .fb-ring{position:absolute;inset:-40px;border:1.5px solid rgba(255,77,0,.2);
-                        border-radius:50%;animation:spin 20s linear infinite}
-.hero-fallback .fb-ring2{inset:-80px;animation-duration:30s;animation-direction:reverse;
+                        border-radius:50%;animation:spin 8s linear infinite}
+.hero-fallback .fb-ring2{inset:-80px;animation-duration:12s;animation-direction:reverse;
                          border-color:rgba(0,0,0,.05)}
 .story-captions{position:absolute;bottom:1rem;left:1rem;right:1rem;
-                background:rgba(244,243,238,.92);backdrop-filter:blur(12px);
+                background:rgba(242,242,240,.94);backdrop-filter:blur(12px);
                 border-radius:var(--r2);padding:.8rem 1rem;border:1px solid var(--card-border);
                 font-size:.78rem;color:var(--ink2);line-height:1.5}
 .story-captions .story-title{font-weight:700;color:var(--ink);margin-bottom:2px;font-size:.82rem}
@@ -55,7 +55,7 @@
 .story-btns{display:flex;gap:6px;margin-bottom:.6rem;flex-wrap:wrap}
 .story-btn{padding:4px 10px;border-radius:var(--r);font-size:.62rem;font-weight:600;
            text-transform:uppercase;letter-spacing:.08em;border:1px solid var(--card-border);
-           color:var(--ink3);transition:all .2s}
+           color:var(--ink3);transition:all .15s}
 .story-btn.active,.story-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
 .boundary-section{position:relative;z-index:1;padding:5rem 2.5rem;max-width:1440px;margin:0 auto}
 .boundary-header{text-align:center;margin-bottom:3rem}
@@ -67,11 +67,11 @@
 .bf-node .bf-label{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink4);
                    font-weight:600;margin-bottom:4px}
 .bf-node .bf-name{font-size:.82rem;font-weight:700}
-.bf-node.bf-keeper{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
-.bf-arrow{width:48px;height:2px;background:var(--card-border);position:relative;flex-shrink:0}
-.bf-arrow::after{content:'→';position:absolute;right:-4px;top:-8px;font-size:.85rem;color:var(--ink4)}
+.bf-node.bf-keeper{border-color:var(--accent);border-width:2px}
+.bf-arrow{width:48px;height:1px;background:var(--card-border);position:relative;flex-shrink:0}
+.bf-arrow::after{content:'→';position:absolute;right:-6px;top:-8px;font-size:.75rem;color:var(--ink4)}
 .bf-arrow.anim{overflow:hidden}
-.bf-arrow.anim::before{content:'';position:absolute;top:0;left:-20px;width:20px;height:2px;
+.bf-arrow.anim::before{content:'';position:absolute;top:0;left:-20px;width:20px;height:1px;
                        background:var(--accent);animation:flowArrow 1.8s linear infinite}
 @keyframes flowArrow{0%{left:-20px}100%{left:48px}}
 .behaviors{position:relative;z-index:1;padding:5rem 2.5rem;max-width:1440px;margin:0 auto}
@@ -79,16 +79,16 @@
 .behaviors-header h2{font-size:2rem;margin-bottom:.5rem}
 .behaviors-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
 .behavior-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--r2);
-               padding:1.5rem;transition:all .3s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}
-.behavior-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+               padding:1.5rem;transition:border-color .2s;position:relative;overflow:hidden}
+.behavior-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
                        background:var(--accent);transform:scaleX(0);transition:transform .3s}
-.behavior-card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,.06)}
+.behavior-card:hover{border-color:var(--ink4)}
 .behavior-card:hover::before{transform:scaleX(1)}
-.behavior-card .bc-icon{width:36px;height:36px;border-radius:var(--r);display:flex;
-                        align-items:center;justify-content:center;font-size:1rem;margin-bottom:.8rem}
+.behavior-card .bc-icon{width:32px;height:32px;border-radius:var(--r);display:flex;
+                        align-items:center;justify-content:center;font-size:.95rem;margin-bottom:.8rem}
 .behavior-card .bc-trigger{font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;
                            color:var(--ink4);font-weight:600;margin-bottom:4px;font-family:var(--mono)}
-.behavior-card .bc-name{font-size:1rem;font-weight:700;margin-bottom:4px}
+.behavior-card .bc-name{font-size:.95rem;font-weight:700;margin-bottom:4px}
 .behavior-card .bc-desc{font-size:.8rem;color:var(--ink3);line-height:1.5}
 .proof{position:relative;z-index:1;padding:5rem 2.5rem;background:var(--ink);color:var(--paper);
        text-align:center}
@@ -104,7 +104,7 @@
 .l-footer a{font-size:.65rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.1em;
             transition:color .2s;margin-left:1.5rem}
 .l-footer a:hover{color:var(--accent)}
-.reveal{opacity:0;transform:translateY(24px);transition:all .7s cubic-bezier(.4,0,.2,1)}
+.reveal{opacity:0;transform:translateY(14px);transition:all .6s cubic-bezier(.4,0,.2,1)}
 .reveal.visible{opacity:1;transform:translateY(0)}
 @media(max-width:1000px){
   .hero{grid-template-columns:1fr;padding-top:5rem}.hero-canvas-wrap{max-height:400px}

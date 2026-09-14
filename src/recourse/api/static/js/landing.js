@@ -52,30 +52,26 @@ function initHero() {
   const dl = new THREE.DirectionalLight(0xffffff, .6);
   dl.position.set(3, 5, 6); scene.add(dl);
 
-  // Core
+  /* Core — sharp dodecahedron, smooth shading */
   core = new THREE.Group();
-  const coreMat = new THREE.MeshStandardMaterial({ color: 0xffffff, flatShading: true, emissive: 0xff4d00, emissiveIntensity: .12 });
-  const coreMesh = new THREE.Mesh(new THREE.IcosahedronGeometry(1.1, 1), coreMat);
+  const coreMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xff4d00, emissiveIntensity: .15, roughness: .3, metalness: .1 });
+  const coreMesh = new THREE.Mesh(new THREE.DodecahedronGeometry(1.1, 0), coreMat);
   core.add(coreMesh);
-  const wireMat = new THREE.LineBasicMaterial({ color: 0xff4d00, transparent: true, opacity: .45 });
-  const wireGeo = new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(1.45, 1));
+  const wireMat = new THREE.LineBasicMaterial({ color: 0xff4d00, transparent: true, opacity: .25 });
+  const wireGeo = new THREE.WireframeGeometry(new THREE.DodecahedronGeometry(1.5, 0));
   core.add(new THREE.LineSegments(wireGeo, wireMat));
   scene.add(core);
 
-  // Boundary
-  const bGeo = new THREE.TorusGeometry(3.1, .018, 8, 80);
+  /* Boundary ring */
+  const bGeo = new THREE.TorusGeometry(3.1, .015, 8, 80);
   const bMat = new THREE.MeshBasicMaterial({ color: 0xff4d00, transparent: true, opacity: .3 });
   boundary = new THREE.Mesh(bGeo, bMat);
   boundary.rotation.x = Math.PI / 2;
   scene.add(boundary);
 
-  // Invoices
-  const invoiceMat = new THREE.MeshStandardMaterial({ color: 0x9a978e, flatShading: true });
-  const verifiedMat = new THREE.MeshStandardMaterial({ color: 0x0e8a3e, flatShading: true });
-  const failedMat = new THREE.MeshStandardMaterial({ color: 0xe03e4a, flatShading: true });
-  const frozenMat = new THREE.MeshStandardMaterial({ color: 0x7b2fd6, flatShading: true });
-  const escalatedMat = new THREE.MeshStandardMaterial({ color: 0xd99e00, flatShading: true });
-  const geo = new THREE.BoxGeometry(.2, .2, .2);
+  /* Invoices — larger, no flatShading */
+  const invoiceMat = new THREE.MeshStandardMaterial({ color: 0x9a978e, roughness: .5, metalness: .05 });
+  const geo = new THREE.BoxGeometry(.32, .32, .32);
   for (let i = 0; i < 16; i++) {
     const a = (i / 16) * Math.PI * 2;
     const mesh = new THREE.Mesh(geo, invoiceMat.clone());
@@ -85,8 +81,8 @@ function initHero() {
     invoices.push(mesh);
   }
 
-  // Particles
-  const pCount = 80;
+  /* Particles — fewer, subtle drift */
+  const pCount = 32;
   const pGeo = new THREE.BufferGeometry();
   const pPos = new Float32Array(pCount * 3);
   for (let i = 0; i < pCount; i++) {
@@ -98,16 +94,16 @@ function initHero() {
     pPos[i*3+2] = r * Math.cos(phi);
   }
   pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-  particles = new THREE.Points(pGeo, new THREE.PointsMaterial({ color: 0xb0ad9f, size: .04, transparent: true, opacity: .5 }));
+  particles = new THREE.Points(pGeo, new THREE.PointsMaterial({ color: 0xb0ad9f, size: .035, transparent: true, opacity: .4 }));
   scene.add(particles);
 
-  // Pointer parallax
+  /* Pointer parallax */
   document.addEventListener('mousemove', e => {
     pointer.x = (e.clientX / innerWidth) * 2 - 1;
     pointer.y = (e.clientY / innerHeight) * 2 - 1;
   });
 
-  // Resize
+  /* Resize */
   window.addEventListener('resize', () => {
     const w2 = wrap.clientWidth, h2 = wrap.clientHeight;
     camera.aspect = w2 / h2;
@@ -118,47 +114,47 @@ function initHero() {
   animate();
 }
 
+function easeInOut(t) {
+  return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+}
+
 function animate() {
   requestAnimationFrame(animate);
   const t = performance.now() * .001;
   if (!prefersReduced) {
-    core.rotation.y = t * .15;
-    core.rotation.x = Math.sin(t * .3) * .08;
-    boundary.rotation.z = t * .04;
-    particles.rotation.y = t * .02;
-    camera.position.x = pointer.x * .3;
-    camera.position.y = 2.4 + pointer.y * -.15;
+    core.rotation.y = t * .12;
+    core.rotation.x = Math.sin(t * .25) * .06;
+    boundary.rotation.z = t * .03;
+    particles.rotation.y = t * .015;
+    camera.position.x = pointer.x * .25;
+    camera.position.y = 2.4 + pointer.y * -.12;
     camera.lookAt(0, 0, 0);
   }
 
-  // Invoice orbits + path interpolation
+  /* Invoice orbits + path interpolation with easing */
   for (const inv of invoices) {
     const ud = inv.userData;
     if (ud.path.length > 0) {
-      ud.pathT += .008;
+      ud.pathT += .006;
       if (ud.pathT >= 1) {
         ud.pathT = 0;
         const pt = ud.path.shift();
         inv.position.copy(pt);
         if (ud.path.length === 0) {
-          // Path done — set final material
-          if (ud.state === 'verified') inv.material = new THREE.MeshStandardMaterial({ color: 0x0e8a3e, flatShading: true });
-          else if (ud.state === 'frozen') inv.material = new THREE.MeshStandardMaterial({ color: 0x7b2fd6, flatShading: true });
-          else if (ud.state === 'escalated') inv.material = new THREE.MeshStandardMaterial({ color: 0xd99e00, flatShading: true });
-          else inv.material = new THREE.MeshStandardMaterial({ color: 0x9a978e, flatShading: true });
+          const mat = { verified: 0x0e8a3e, frozen: 0x7b2fd6, escalated: 0xd99e00 }[ud.state] || 0x9a978e;
+          inv.material = new THREE.MeshStandardMaterial({ color: mat, roughness: .5, metalness: .05 });
         }
       }
       if (ud.path.length > 0) {
         const from = ud.path.length === 1 ? inv.position : ud.path[0];
         const to = ud.path[0];
-        inv.position.lerpVectors(from, to, ud.pathT);
+        inv.position.lerpVectors(from, to, easeInOut(ud.pathT));
       }
     } else if (!prefersReduced) {
-      // Idle orbit
-      const a = ud.baseAngle + t * .12;
+      const a = ud.baseAngle + t * .1;
       inv.position.x = Math.cos(a) * 4.3;
       inv.position.z = Math.sin(a) * 4.3;
-      inv.rotation.y = t * .5;
+      inv.rotation.y = t * .04;
     }
   }
 
@@ -184,7 +180,7 @@ const stories = {
       inv.userData.path = pts.slice(1);
       inv.userData.pathT = 0;
       inv.userData.state = 'verified';
-      inv.material = new THREE.MeshStandardMaterial({ color: 0xff4d00, flatShading: true });
+      inv.material = new THREE.MeshStandardMaterial({ color: 0xff4d00, roughness: .4, metalness: .1 });
       pulseCore(0xff4d00);
     }
   },
@@ -216,7 +212,7 @@ const stories = {
     run: (n) => {
       resetInvoices();
       const inv = invoices[n % invoices.length];
-      inv.material = new THREE.MeshStandardMaterial({ color: 0xe03e4a, flatShading: true });
+      inv.material = new THREE.MeshStandardMaterial({ color: 0xe03e4a, roughness: .5, metalness: .05 });
       inv.position.set(-2.2, 0, 0);
       const pts = [new THREE.Vector3(-3.2, 0, 0), new THREE.Vector3(-3.15, 0, 0)];
       inv.userData.path = pts;
@@ -236,16 +232,14 @@ const stories = {
       resetInvoices();
       const inv = invoices[n % invoices.length];
       inv.position.set(4.3, 0, 0);
-      inv.material = new THREE.MeshStandardMaterial({ color: 0x0e8a3e, flatShading: true });
+      inv.material = new THREE.MeshStandardMaterial({ color: 0x0e8a3e, roughness: .5, metalness: .05 });
       setTimeout(() => {
-        inv.material = new THREE.MeshStandardMaterial({ color: 0xe03e4a, flatShading: true });
+        inv.material = new THREE.MeshStandardMaterial({ color: 0xe03e4a, roughness: .5, metalness: .05 });
         pulseCore(0xe03e4a);
       }, 800);
       setTimeout(() => {
-        inv.material = new THREE.MeshStandardMaterial({ color: 0x7b2fd6, flatShading: true });
+        inv.material = new THREE.MeshStandardMaterial({ color: 0x7b2fd6, roughness: .5, metalness: .05 });
         inv.userData.state = 'frozen';
-        core.scale.set(.92, .92, .92);
-        setTimeout(() => core.scale.set(1, 1, 1), 200);
       }, 1800);
     }
   }
@@ -258,20 +252,17 @@ function resetInvoices() {
     inv.userData.state = 'pending';
     const a = inv.userData.baseAngle;
     inv.position.set(Math.cos(a) * 4.3, 0, Math.sin(a) * 4.3);
-    inv.material = new THREE.MeshStandardMaterial({ color: 0x9a978e, flatShading: true });
+    inv.material = new THREE.MeshStandardMaterial({ color: 0x9a978e, roughness: .5, metalness: .05 });
   }
 }
 
 function pulseCore(color) {
   if (!core) return;
-  const orig = core.children[0].material.emissiveIntensity;
   core.children[0].material.emissive.setHex(color);
-  core.children[0].material.emissiveIntensity = .6;
-  core.scale.set(1.12, 1.12, 1.12);
+  core.children[0].material.emissiveIntensity = .5;
   setTimeout(() => {
     core.children[0].material.emissive.setHex(0xff4d00);
-    core.children[0].material.emissiveIntensity = orig;
-    core.scale.set(1, 1, 1);
+    core.children[0].material.emissiveIntensity = .15;
   }, 500);
 }
 

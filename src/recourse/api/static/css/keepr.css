@@ -1,15 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --paper:#f4f3ee;--paper2:#eae8e0;--ink:#111110;--ink2:#3a3a36;--ink3:#7a786e;--ink4:#b0ad9f;
-  --accent:#FF4D00;--accent-soft:rgba(255,77,0,.08);--accent-glow:rgba(255,77,0,.18);
-  --green:#0E8A3E;--green-soft:rgba(14,138,62,.08);
-  --yellow:#D99E00;--yellow-soft:rgba(217,158,0,.08);
-  --red:#E03E4A;--red-soft:rgba(224,62,74,.08);
-  --purple:#7B2FD6;--purple-soft:rgba(123,47,214,.08);
-  --card:#ffffff;--card-border:#e2e0d8;--subtle:#f0efea;
+  --paper:#f2f2f0;--paper2:#e8e8e4;--ink:#111110;--ink2:#3a3a36;--ink3:#7a786e;--ink4:#b0ad9f;
+  --accent:#FF4D00;--accent-soft:rgba(255,77,0,.06);
+  --green:#0E8A3E;--green-soft:rgba(14,138,62,.06);
+  --yellow:#D99E00;--yellow-soft:rgba(217,158,0,.06);
+  --red:#E03E4A;--red-soft:rgba(224,62,74,.06);
+  --purple:#7B2FD6;--purple-soft:rgba(123,47,214,.06);
+  --card:#ffffff;--card-border:#dddbd4;--subtle:#eeede9;
   --font:'Space Grotesk',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
-  --r:8px;--r2:12px;--r3:16px;
+  --r:3px;--r2:5px;--r3:6px;
 }
 html{scroll-behavior:smooth}
 body{font-family:var(--font);color:var(--ink);background:var(--paper);
@@ -18,58 +18,56 @@ h1,h2,h3,h4{line-height:1.15;font-weight:700;letter-spacing:-.025em}
 a{color:inherit;text-decoration:none}
 button{font-family:var(--font);cursor:pointer;border:none;background:none}
 img,canvas{display:block}
-@keyframes fadeInUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulseGlow{0%,100%{opacity:.6}50%{opacity:1}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes scanLine{0%{left:0}100%{left:100%}}
-@keyframes slideInRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
-@keyframes slideInLeft{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:translateX(0)}}
-@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
-@keyframes lockShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
-.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;
+@keyframes slideInRight{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:var(--r);
       font-size:.68rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
-      font-family:var(--mono)}
-.chip::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.chip-green{background:var(--green-soft);color:var(--green)}.chip-green::before{background:var(--green)}
-.chip-yellow{background:var(--yellow-soft);color:var(--yellow)}.chip-yellow::before{background:var(--yellow)}
-.chip-red{background:var(--red-soft);color:var(--red)}.chip-red::before{background:var(--red)}
-.chip-purple{background:var(--purple-soft);color:var(--purple)}.chip-purple::before{background:var(--purple)}
-.chip-ink{background:rgba(0,0,0,.04);color:var(--ink2)}.chip-ink::before{background:var(--ink3)}
-.chip-orange{background:var(--accent-soft);color:var(--accent)}.chip-orange::before{background:var(--accent)}
+      font-family:var(--mono);border:1px solid transparent}
+.chip::before{content:'';width:5px;height:5px;border-radius:1px;flex-shrink:0}
+.chip-green{background:var(--green-soft);color:var(--green);border-color:rgba(14,138,62,.12)}.chip-green::before{background:var(--green)}
+.chip-yellow{background:var(--yellow-soft);color:var(--yellow);border-color:rgba(217,158,0,.12)}.chip-yellow::before{background:var(--yellow)}
+.chip-red{background:var(--red-soft);color:var(--red);border-color:rgba(224,62,74,.12)}.chip-red::before{background:var(--red)}
+.chip-purple{background:var(--purple-soft);color:var(--purple);border-color:rgba(123,47,214,.12)}.chip-purple::before{background:var(--purple)}
+.chip-ink{background:rgba(0,0,0,.03);color:var(--ink2);border-color:rgba(0,0,0,.06)}.chip-ink::before{background:var(--ink3)}
+.chip-orange{background:var(--accent-soft);color:var(--accent);border-color:rgba(255,77,0,.1)}.chip-orange::before{background:var(--accent)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
-     padding:10px 22px;border-radius:var(--r);font-weight:600;font-size:.78rem;
-     letter-spacing:.04em;transition:all .25s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}
-.btn-primary{background:var(--accent);color:#fff;box-shadow:0 2px 14px rgba(255,77,0,.28)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(255,77,0,.38)}
-.btn-primary:active{transform:translateY(0)}
-.btn-outline{color:var(--ink);border:2px solid var(--card-border);background:transparent}
-.btn-outline:hover{border-color:var(--ink);transform:translateY(-1px)}
-.btn-sm{padding:7px 14px;font-size:.7rem}
-.btn-ghost{color:var(--ink3);padding:7px 14px}.btn-ghost:hover{color:var(--ink);background:rgba(0,0,0,.03)}
+     padding:9px 20px;border-radius:var(--r);font-weight:600;font-size:.78rem;
+     letter-spacing:.04em;transition:all .15s ease;position:relative;overflow:hidden}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-primary:active{filter:brightness(.95)}
+.btn-outline{color:var(--ink);border:1px solid var(--card-border);background:transparent}
+.btn-outline:hover{border-color:var(--ink3);background:rgba(0,0,0,.02)}
+.btn-sm{padding:6px 12px;font-size:.7rem}
+.btn-ghost{color:var(--ink3);padding:6px 12px}.btn-ghost:hover{color:var(--ink);background:rgba(0,0,0,.03)}
 .panel{background:var(--card);border:1px solid var(--card-border);border-radius:var(--r2);overflow:hidden}
 .section-title{font-size:1.35rem;font-weight:700;letter-spacing:-.02em}
 .section-title .mirror{font-size:.95rem;color:transparent;-webkit-text-stroke:1.5px var(--ink);
                        transform:scaleY(-1);opacity:.07;display:inline-block;margin-left:.5rem;
                        filter:blur(.5px);user-select:none}
 .tag{font-size:.6rem;text-transform:uppercase;letter-spacing:.14em;color:var(--ink3);
-     font-weight:600;padding:4px 10px;border:1px solid var(--card-border);border-radius:20px}
+     font-weight:600;padding:3px 8px;border:1px solid var(--card-border);border-radius:var(--r)}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;
              padding:3rem 1.5rem;color:var(--ink4);font-size:.85rem;text-align:center}
 .loading-shimmer{background:linear-gradient(90deg,var(--subtle) 25%,var(--paper) 50%,var(--subtle) 75%);
                  background-size:200%;animation:shimmer 1.5s infinite;border-radius:var(--r)}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .badge-num{display:inline-flex;align-items:center;justify-content:center;
-           min-width:18px;height:18px;border-radius:9px;padding:0 5px;
+           min-width:18px;height:18px;border-radius:2px;padding:0 5px;
            font-size:.6rem;font-weight:700;background:var(--accent);color:#fff;font-family:var(--mono)}
-::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--ink4);border-radius:3px}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+::-webkit-scrollbar-thumb{background:var(--ink4);border-radius:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:1px}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;
                         transition-duration:0.01ms!important}
 }
 @media(max-width:768px){
-  .btn{padding:8px 16px;font-size:.72rem}
+  .btn{padding:7px 14px;font-size:.72rem}
   .section-title{font-size:1.15rem}
 }
