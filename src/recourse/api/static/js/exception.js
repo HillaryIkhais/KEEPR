@@ -16,7 +16,7 @@ export class ExceptionPanel {
     
     this.active = exception;
     this.lifecycle = this._buildLifecycle(exception.state);
-    this.phaseIndex = 0;
+    this.phaseIndex = this._getActivePhaseIndex(exception.state);
     this.lastUpdate = Date.now();
     this._render();
   }
@@ -37,6 +37,10 @@ export class ExceptionPanel {
       { label: 'VERIFIED', color: '#1A8C3E', icon: '+' }
     ];
 
+    return phases;
+  }
+
+  _getActivePhaseIndex(state) {
     const stateMap = {
       'FAILED': 0,
       'CLASSIFYING': 2,
@@ -45,20 +49,15 @@ export class ExceptionPanel {
       'VERIFYING_RECOVERY': 4,
       'VERIFIED': 5
     };
-
-    const activeIdx = stateMap[state] || 0;
-    return phases.map((p, i) => ({
-      ...p,
-      active: i === activeIdx,
-      completed: i < activeIdx,
-      pending: i > activeIdx
-    }));
+    return stateMap[state] || 0;
   }
 
   _render() {
     if (!this.active) return;
 
     const ex = this.active;
+    const activeIdx = this._getActivePhaseIndex(ex.state);
+    
     const html = `
       <div class="exception-panel">
         <div class="exception-header">
@@ -67,15 +66,20 @@ export class ExceptionPanel {
         </div>
         <div class="exception-mode">${ex.mode || 'SERVICE FAILURE'}</div>
         <div class="exception-lifecycle">
-          ${this.lifecycle.map((phase, i) => `
-            <div class="lifecycle-phase ${phase.active ? 'active' : ''} ${phase.completed ? 'completed' : ''} ${phase.pending ? 'pending' : ''}">
-              <div class="phase-indicator" style="background: ${phase.completed ? phase.color : phase.active ? phase.color : '#333'}">
-                ${phase.completed ? phase.icon : phase.active ? phase.icon : ''}
+          ${this.lifecycle.map((phase, i) => {
+            const isCompleted = i < activeIdx;
+            const isActive = i === activeIdx;
+            const isPending = i > activeIdx;
+            return `
+              <div class="lifecycle-phase ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isPending ? 'pending' : ''}">
+                <div class="phase-indicator" style="background: ${isCompleted ? phase.color : isActive ? phase.color : '#222'}">
+                  ${isCompleted ? phase.icon : isActive ? phase.icon : ''}
+                </div>
+                <div class="phase-label">${phase.label}</div>
+                ${i < this.lifecycle.length - 1 ? '<div class="phase-connector"></div>' : ''}
               </div>
-              <div class="phase-label">${phase.label}</div>
-              ${i < this.lifecycle.length - 1 ? '<div class="phase-connector"></div>' : ''}
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
         <div class="exception-status">
           ${this._statusText(ex.state)}

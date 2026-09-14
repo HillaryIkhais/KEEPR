@@ -196,7 +196,7 @@ export class ContinuityMap {
       [STATES.RECOVERY_ACTIVE]: 0.58,
       [STATES.VERIFYING_RECOVERY]: 0.66,
       [STATES.VERIFIED]: 0.88,
-      [STATES.FAILED]: 0.50,
+      [STATES.FAILED]: 0.38,
       [STATES.FROZEN]: 0.94,
       [STATES.ESCALATED]: 0.02,
       [STATES.IDLE]: 0.06
@@ -212,9 +212,12 @@ export class ContinuityMap {
     const escalatedZone = this.H * 0.15;
     const frozenZone = this.H * 0.90;
 
+    if (state === STATES.FAILED) {
+      return mainFlow + 60 + (idx % 5) * 12;
+    }
     if (state === STATES.KEEPR || state === STATES.CLASSIFYING || 
         state === STATES.RECOVERY_SELECTED || state === STATES.RECOVERY_ACTIVE ||
-        state === STATES.VERIFYING_RECOVERY || state === STATES.FAILED) {
+        state === STATES.VERIFYING_RECOVERY) {
       return recoveryZone + (idx % 8) * 18;
     }
     if (state === STATES.ESCALATED) return escalatedZone + (idx % 5) * 20;
@@ -296,6 +299,17 @@ export class ContinuityMap {
       const size = n.state === STATES.KEEPR || n.state === STATES.CLASSIFYING ||
                    n.state === STATES.RECOVERY_ACTIVE ? 10 : 7;
 
+      if (n.state === STATES.FAILED) {
+        ctx.strokeStyle = 'rgba(255, 0, 68, 0.3)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(n.x + 40, n.y - 60);
+        ctx.lineTo(n.x, n.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
       ctx.fillStyle = color;
       ctx.fillRect(n.x - size/2, n.y - size/2, size, size);
 
@@ -317,6 +331,10 @@ export class ContinuityMap {
         const pulse = 0.5 + Math.sin(this.time * 4) * 0.5;
         ctx.fillStyle = `rgba(255, 0, 68, ${0.2 + pulse * 0.3})`;
         ctx.fillRect(n.x - 16, n.y - 16, 32, 32);
+        
+        ctx.strokeStyle = '#FF0044';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(n.x - 18, n.y - 18, 36, 36);
       }
 
       if (n.flash) {

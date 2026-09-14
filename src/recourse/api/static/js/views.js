@@ -85,6 +85,8 @@ async function runChunked() {
   let faultInjected = false;
   let processed = 0;
   let lastRecovered = 0;
+  let lastEscalated = 0;
+  let lastFrozen = 0;
   try {
     while (true) {
       const s = await getStatus();
@@ -102,7 +104,9 @@ async function runChunked() {
         faultInjected = true;
         msg.textContent = 'FAULT INJECTED';
         _eventStream.addEvent('SYSTEM', null, 'FAULT INJECTED: inv_003 http_503', 'FAULT');
-        const res = await injectFault('inv_003', 'http_503');
+        await sleep(300);
+        _eventStream.addEvent('KEEPR', 'inv_003', 'EXCEPTION ISOLATED — ENTERING KEEPR CONTROL PLANE', 'ISOLATING');
+        await injectFault('inv_003', 'http_503');
         await refreshStatus();
         await sleep(200);
       }
@@ -112,8 +116,26 @@ async function runChunked() {
       
       const currentRecovered = s.counts.recovered || 0;
       if (currentRecovered > lastRecovered) {
+        _eventStream.addEvent('KEEPR', 'inv_003', 'CLASSIFYING FAILURE TYPE', 'CLASSIFY');
+        await sleep(150);
+        _eventStream.addEvent('KEEPR', 'inv_003', 'RECOVERY POLICY SELECTED', 'RECOVERY');
+        await sleep(150);
+        _eventStream.addEvent('KEEPR', 'inv_003', 'VERIFYING AUTHORITATIVE STATE', 'VERIFY');
+        await sleep(150);
         _eventStream.addEvent('KEEPR', 'inv_003', 'EXCEPTION CONTAINED — RECOVERY COMPLETE', 'RECOVERED');
         lastRecovered = currentRecovered;
+      }
+      
+      const currentEscalated = s.counts.escalated || 0;
+      if (currentEscalated > lastEscalated) {
+        _eventStream.addEvent('KEEPR', null, 'ITEM ESCALATED TO HUMAN REVIEW', 'ESCALATED');
+        lastEscalated = currentEscalated;
+      }
+      
+      const currentFrozen = s.counts.frozen || 0;
+      if (currentFrozen > lastFrozen) {
+        _eventStream.addEvent('KEEPR', null, 'CONFLICT DETECTED — ITEM FROZEN', 'FROZEN');
+        lastFrozen = currentFrozen;
       }
       
       msg.textContent = `PROCESSING ${processed}/50`;
@@ -398,6 +420,26 @@ export async function refreshStatus() {
     updateTopbar(s);
     updateHero(s);
     updateMetrics(s);
+    
+    if (_exceptionPanel) {
+      const inv003 = s.invoices?.inv_003;
+      if (inv003 && inv003.attempts > 0 && inv003.status !== 'COMPLETED') {
+        _exceptionPanel.show({
+          iid: 'inv_003',
+          mode: inv003.recovery_mode || 'http_503',
+          state: s.run_state || 'CLASSIFYING'
+        });
+      } else if (inv003 && inv003.status === 'COMPLETED' && inv003.attempts > 0) {
+        _exceptionPanel.show({
+          iid: 'inv_003',
+          mode: inv003.recovery_mode || 'http_503',
+          state: 'VERIFIED'
+        });
+        setTimeout(() => {
+          if (_exceptionPanel) _exceptionPanel.hide();
+        }, 3000);
+      }
+    }
   } catch (e) { /* silent */ }
 }
 
