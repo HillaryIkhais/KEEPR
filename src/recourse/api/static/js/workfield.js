@@ -44,16 +44,16 @@ export class WorkField {
       const prev = this.lastStatus[iid];
       const existing = this.nodes.find(n => n.iid === iid);
       
-      // Track recovery start
-      if (info.attempts > 0 && prev && prev.status !== status && status === 'VERIFIED') {
+      // Brutalist instant state change
+      if (info.attempts > 0 && info.attempts !== (existing?.attempts || 0)) {
         this.recoveryTimes[iid] = now;
       }
       
-      // Show KEEPR for 2 seconds after recovery
+      // Show KEEPR for 5 seconds after recovery with brutal flash
       let displayStatus = status;
       if (status === 'VERIFIED' && info.attempts > 0 && this.recoveryTimes[iid]) {
         const timeSinceRecovery = now - this.recoveryTimes[iid];
-        if (timeSinceRecovery < 2000) {
+        if (timeSinceRecovery < 5000) {
           displayStatus = 'KEEPR';
         } else {
           delete this.recoveryTimes[iid];
@@ -63,14 +63,16 @@ export class WorkField {
       const idx = this.nodes.indexOf(existing) !== -1 ? 
                   this.nodes.indexOf(existing) : Object.keys(invs).indexOf(iid);
       
+      // Brutalist instant move, no easing
       newNodes.push({
         iid,
         idx,
         status: displayStatus,
         attempts: info.attempts || 0,
-        x: existing ? existing.x : this._targetX(idx, displayStatus),
-        y: existing ? existing.y : this._targetY(displayStatus, idx),
-        justChanged: prev && prev.status !== status
+        x: this._targetX(idx, displayStatus),
+        y: this._targetY(displayStatus, idx),
+        justChanged: prev && prev.status !== status,
+        flash: (prev && prev.status !== status)
       });
     }
     
@@ -117,20 +119,14 @@ export class WorkField {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.W, this.H);
     
-    ctx.fillStyle = '#0A0A0A';
+    // Brutalist background - concrete
+    ctx.fillStyle = '#1A1A1A';
     ctx.fillRect(0, 0, this.W, this.H);
-
-    ctx.fillStyle = '#888888';
-    ctx.font = 'bold 13px JetBrains Mono';
-    ctx.fillText('QUEUE', 40, 45);
-    ctx.fillText('FETCHING', this.W * 0.28, 45);
-    ctx.fillText('KEEPING', this.W * 0.56, 45);
-    ctx.fillText('VERIFY', this.W * 0.82, 45);
-    ctx.fillText('VERIFIED', this.W - 90, 45);
-
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 1;
-    for (let i = 1; i < 5; i++) {
+    
+    // Grid lines - brutal
+    ctx.strokeStyle = '#333333';
+    ctx.lineWidth = 2;
+    for (let i = 0; i <= 4; i++) {
       const x = this.W * (0.15 + i * 0.17);
       ctx.beginPath();
       ctx.moveTo(x, 60);
@@ -138,37 +134,50 @@ export class WorkField {
       ctx.stroke();
     }
 
-    for (const n of this.nodes) {
-      const targetX = this._targetX(n.idx, n.status);
-      const targetY = this._targetY(n.status, n.idx);
-      
-      n.x += (targetX - n.x) * 0.25;
-      n.y += (targetY - n.y) * 0.25;
+    // Zone labels - brutalist monospace
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 16px JetBrains Mono';
+    ctx.fillText('QUEUE', 40, 45);
+    ctx.fillText('FETCHING', this.W * 0.28, 45);
+    ctx.fillText('KEEPING', this.W * 0.56, 45);
+    ctx.fillText('VERIFY', this.W * 0.82, 45);
+    ctx.fillText('VERIFIED', this.W - 90, 45);
 
+    for (const n of this.nodes) {
       const colors = {
         PENDING: '#7A7A7A',
         PROCESSING: '#FF4D00',
-        KEEPR: '#7B2FD6',
-        VERIFIED: '#00B050',
+        KEEPR: '#FF00FF',
+        VERIFIED: '#00FF00',
         RECOVERED: '#00FF88',
         ESCALATED: '#FFB000',
         FROZEN: '#FF003C'
       };
       const color = colors[n.status] || colors.PENDING;
 
+      // Brutalist square with sharp edges
       ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.roundRect(n.x - 8, n.y - 8, 16, 16, 3);
-      ctx.fill();
+      ctx.fillRect(n.x - 12, n.y - 12, 24, 24);
+      
+      // Flash border when state changes
+      if (n.flash) {
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(n.x - 14, n.y - 14, 28, 28);
+      }
 
-      if (n.status === 'KEEPR' || n.status === 'PROCESSING') {
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 15;
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.roundRect(n.x - 10, n.y - 10, 20, 20, 3);
-        ctx.fill();
-        ctx.shadowBlur = 0;
+      // KEEPR brutal glow/flash
+      if (n.status === 'KEEPR') {
+        ctx.strokeStyle = '#FF00FF';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(n.x - 16, n.y - 16, 32, 32);
+        
+        // Flash pulse
+        const pulse = Math.sin(this.time * 0.5) > 0;
+        if (pulse) {
+          ctx.fillStyle = 'rgba(255,0,255,0.3)';
+          ctx.fillRect(n.x - 20, n.y - 20, 40, 40);
+        }
       }
     }
   }
