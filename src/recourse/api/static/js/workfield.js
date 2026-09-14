@@ -100,7 +100,7 @@ export class WorkField {
 
     /* State colors */
     const colors = {
-      PENDING: '#2A2A2A',
+      PENDING: '#7A7A7A',
       PROCESSING: '#FF4D00',
       KEEPR: '#7B2FD6',
       VERIFIED: '#00B050',
@@ -211,6 +211,7 @@ export class WorkField {
 
   _normalizeStatus(st, attempts) {
     if (st === 'COMPLETED' && attempts > 0) return 'RECOVERED';
+    if (st === 'COMPLETED') return 'VERIFIED';
     if (st === 'PENDING') return 'PENDING';
     if (st === 'ESCALATED') return 'ESCALATED';
     if (st === 'FROZEN') return 'FROZEN';
