@@ -77,18 +77,18 @@ async function runChunked() {
       const pending = s.counts.pending || 0;
       if (pending === 0) { msg.textContent = `Complete. 50/50`; return; }
 
-      // Auto-inject fault on inv_007 after 5 invoices for demo drama
-      if (!faultInjected && processed >= 5) {
+      // Auto-inject fault on inv_003 immediately for demo visibility
+      if (!faultInjected && processed >= 0) {
         faultInjected = true;
-        msg.textContent = 'FAULT: inv_007 503';
-        const res = await injectFault('inv_007', 'http_503');
+        msg.textContent = 'FAULT INJECTED: inv_003 503';
+        const res = await injectFault('inv_003', 'http_503');
         await refreshStatus();
-        await sleep(300);
+        await sleep(500);
       }
 
       const res = await runWorker(1);
       processed = 50 - pending;
-      msg.textContent = faultInjected ? `Processing... ${processed}/50 (recovering...)` : `Processing... ${processed}/50`;
+      msg.textContent = faultInjected ? `Processing... ${processed}/50 (RECOVERING...)` : `Processing... ${processed}/50`;
       await refreshStatus();
       await sleep(100);
     }
