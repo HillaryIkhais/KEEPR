@@ -33,10 +33,10 @@ export function mountOverview() {
       <div class="ov-q yellow"><div class="q-val" id="q-escalated">0</div><div class="q-lbl">Human decisions required</div></div>
     </div>
     <div class="ov-controls">
-      <button class="btn btn-primary" id="btn-run">▶ Run Job</button>
-      <button class="btn btn-outline btn-sm" id="btn-pause">⏸ Pause</button>
-      <button class="btn btn-outline btn-sm" id="btn-resume">▶ Resume</button>
-      <button class="btn btn-ghost btn-sm" id="btn-reset">⟳ Reset</button>
+      <button class="btn btn-primary" id="btn-run">Run Job</button>
+      <button class="btn btn-outline btn-sm" id="btn-pause">Pause</button>
+      <button class="btn btn-outline btn-sm" id="btn-resume">Resume</button>
+      <button class="btn btn-ghost btn-sm" id="btn-reset">Reset</button>
       <span class="status-msg" id="run-msg"></span>
     </div>
     <div class="ov-stream">
@@ -191,12 +191,12 @@ export function mountLab() {
         <div class="lab-pipeline" id="lab-pipeline">
           <div class="pl-title">Recovery Pipeline</div>
           <div class="pl-stages" id="pl-stages">
-            <div class="pl-stage" data-stage="failure">FAILURE</div><span class="pl-arrow">→</span>
-            <div class="pl-stage" data-stage="classify">CLASSIFY</div><span class="pl-arrow">→</span>
-            <div class="pl-stage" data-stage="policy">POLICY</div><span class="pl-arrow">→</span>
-            <div class="pl-stage" data-stage="authority">AUTHORITY</div><span class="pl-arrow">→</span>
-            <div class="pl-stage" data-stage="action">ACTION</div><span class="pl-arrow">→</span>
-            <div class="pl-stage" data-stage="observe">OBSERVE</div><span class="pl-arrow">→</span>
+            <div class="pl-stage" data-stage="failure">FAILURE</div><span class="pl-arrow">/</span>
+            <div class="pl-stage" data-stage="classify">CLASSIFY</div><span class="pl-arrow">/</span>
+            <div class="pl-stage" data-stage="policy">POLICY</div><span class="pl-arrow">/</span>
+            <div class="pl-stage" data-stage="authority">AUTHORITY</div><span class="pl-arrow">/</span>
+            <div class="pl-stage" data-stage="action">ACTION</div><span class="pl-arrow">/</span>
+            <div class="pl-stage" data-stage="observe">OBSERVE</div><span class="pl-arrow">/</span>
             <div class="pl-stage" data-stage="verify">VERIFY</div><span class="pl-arrow">→</span>
             <div class="pl-stage" data-stage="final">FINAL</div>
           </div>
@@ -306,7 +306,7 @@ function renderFalseCompletionDemo(res, container) {
     </div>
     <div class="lab-split-vs">AGENT CLAIM ≠ AUTHORITATIVE STATE</div>
     <div class="lab-reject">
-      <div class="lr-reject-title">KEEPR → REJECT → ROLLBACK → FROZEN</div>
+      <div class="lr-reject-title">KEEPR / REJECT / ROLLBACK / FROZEN</div>
       <div class="lr-reject-desc">${res.explanation}</div>
       <div style="margin-top:.8rem;font-size:.82rem;font-weight:600;color:var(--green);font-family:var(--mono)">
         THE OTHER 49 INVOICES CONTINUE.
@@ -319,11 +319,11 @@ function renderAuthorityDemo(res, container) {
     <div class="lab-boundary" id="lab-boundary">
       <div class="lb-title">Authority Boundary</div>
       <div class="lb-flow">
-        <div class="lb-node allowed">ar.read ✓</div>
-        <div class="lb-arrow">→</div>
-        <div class="lb-node" id="lb-request" style="border-color:var(--yellow);color:var(--yellow)">payroll.write ?</div>
-        <div class="lb-arrow">→</div>
-        <div class="lb-node denied" id="lb-boundary">⊘ BOUNDARY</div>
+        <div class="lb-node allowed">ar.read</div>
+        <div class="lb-arrow">/</div>
+        <div class="lb-node" id="lb-request" style="border-color:var(--yellow);color:var(--yellow)">payroll.write</div>
+        <div class="lb-arrow">/</div>
+        <div class="lb-node denied" id="lb-boundary">BOUNDARY</div>
       </div>
       <div class="lb-stamp" id="lb-stamp">AUTHORITY WIDENING — BLOCKED</div>
       <div style="margin-top:.6rem;font-size:.78rem;color:var(--green);font-weight:600;font-family:var(--mono);opacity:0;transition:opacity .3s" id="lb-continue">
@@ -346,12 +346,12 @@ export function mountAuthority() {
     </div>
     <div class="auth-map">
       <div class="auth-zone granted">
-        <div class="az-title">✓ Granted Capabilities</div>
-        ${scope.map(c => `<div class="auth-cap"><div class="ac-check">✓</div><span>${c}</span></div>`).join('')}
+        <div class="az-title">Granted Capabilities</div>
+        ${scope.map(c => `<div class="auth-cap"><div class="ac-check"></div><span>${c}</span></div>`).join('')}
       </div>
       <div class="auth-zone forbidden">
-        <div class="az-title">✕ Forbidden</div>
-        ${forbidden.map(c => `<div class="auth-cap"><div class="ac-check">✕</div><span>${c}</span></div>`).join('')}
+        <div class="az-title">Forbidden</div>
+        ${forbidden.map(c => `<div class="auth-cap"><div class="ac-check ac-deny"></div><span>${c}</span></div>`).join('')}
       </div>
     </div>
     <div class="auth-demo">
@@ -408,7 +408,7 @@ function renderVerifyEvents() {
   if (events.length === 0) { el.innerHTML = '<div class="empty-state">No verification events yet.</div>'; return; }
   el.innerHTML = events.slice(-12).map(e => {
     const passed = /verified:|VERIFIED|pass/.test(e.event);
-    return `<div class="ev-item"><span class="ev-actor ev-actor-verify">VERIFY</span>
+    return `<div class="ev-item" data-actor="verify"><span class="ev-actor ev-actor-verify">VERIFY</span>
       <span class="ev-iid">${e.iid}</span><span class="ev-text">${e.state}:${e.event}</span>
       <span class="chip ${passed ? 'chip-green' : 'chip-red'}" style="margin-left:auto">${passed ? 'PASS' : 'FAIL'}</span></div>`;
   }).join('');
@@ -557,7 +557,7 @@ function renderEventStream() {
   if (recent.length === 0) { body.innerHTML = '<div class="empty-state">No events yet — run the job to see KEEPR in action.</div>'; return; }
   body.innerHTML = recent.map(e => {
     const info = classifyEvent(e.event, e.detail);
-    return `<div class="ev-item"><span class="ev-actor ev-actor-${info.actor}">${info.label}</span>
+    return `<div class="ev-item" data-actor="${info.actor}"><span class="ev-actor ev-actor-${info.actor}">${info.label}</span>
       <span class="ev-iid">${e.iid}</span><span class="ev-text">${e.state}:${e.event}</span></div>`;
   }).join('');
   const countEl = $('#ev-count');

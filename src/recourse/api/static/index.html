@@ -79,45 +79,45 @@
   </div>
   <div class="behaviors-grid">
     <div class="behavior-card">
-      <div class="bc-icon" style="background:var(--green-soft);color:var(--green)">⚡</div>
+      <div class="bc-icon bc-retry"></div>
       <div class="bc-trigger">503 Service Failure</div>
       <div class="bc-name">Transaction Isolated</div>
       <div class="bc-desc">One invoice fails. Bounded retry with substitute fallback. Job continues. 49 others unaffected.</div>
     </div>
     <div class="behavior-card">
-      <div class="bc-icon" style="background:var(--accent-soft);color:var(--accent)">⊘</div>
+      <div class="bc-icon bc-reject"></div>
       <div class="bc-trigger">Malformed Response</div>
       <div class="bc-name">Poisoned Data Rejected</div>
       <div class="bc-desc">Schema-first validation catches bad data before it corrupts the job. Alternate source used.</div>
     </div>
     <div class="behavior-card">
-      <div class="bc-icon" style="background:var(--yellow-soft);color:var(--yellow)">⊘</div>
+      <div class="bc-icon bc-escalate"></div>
       <div class="bc-trigger">401 Unauthorized</div>
       <div class="bc-name">Escalated Immediately</div>
       <div class="bc-desc">Authentication failures are never retried. Human judgment required — escalated with full evidence.</div>
     </div>
     <div class="behavior-card">
-      <div class="bc-icon" style="background:var(--green-soft);color:var(--green)">↺</div>
+      <div class="bc-icon bc-rollback"></div>
       <div class="bc-trigger">Partial Result</div>
       <div class="bc-name">Rolled Back Safely</div>
       <div class="bc-desc">Incomplete work undone via compensating actions. Item restored to PENDING. Job resumes.</div>
     </div>
     <div class="behavior-card">
-      <div class="bc-icon" style="background:var(--red-soft);color:var(--red)">⊘</div>
+      <div class="bc-icon bc-freeze"></div>
       <div class="bc-trigger">False Completion</div>
-      <div class="bc-name">Claim Rejected → Frozen</div>
+      <div class="bc-name">Claim Rejected, Frozen</div>
       <div class="bc-desc">Agent claims DONE. Ledger disagrees. KEEPR rejects, rolls back, freezes. The other 49 continue.</div>
     </div>
     <div class="behavior-card">
-      <div class="bc-icon" style="background:var(--red-soft);color:var(--red)">⊘</div>
+      <div class="bc-icon bc-block"></div>
       <div class="bc-trigger">Authority Widening</div>
       <div class="bc-name">Blocked Before Execution</div>
       <div class="bc-desc">Out-of-scope request intercepted before any adapter is touched. Recovery cannot expand power.</div>
     </div>
     <div class="behavior-card">
-      <div class="bc-icon" style="background:var(--purple-soft);color:var(--purple)">⊘</div>
+      <div class="bc-icon bc-frozen"></div>
       <div class="bc-trigger">Conflicting Sources</div>
-      <div class="bc-name">Frozen — Halted</div>
+      <div class="bc-name">Frozen, Halted</div>
       <div class="bc-desc">Unresolvable contradiction. This item frozen. Human adjudication required. Rest of job preserved.</div>
     </div>
   </div>

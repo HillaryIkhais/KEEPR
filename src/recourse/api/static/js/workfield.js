@@ -109,10 +109,14 @@ export class WorkField {
 
   _draw() {
     const ctx = this.ctx, W = this.W, H = this.H;
+    const t = performance.now() * .001;
     ctx.clearRect(0, 0, W, H);
 
-    /* Background */
-    ctx.fillStyle = '#f5f5f3';
+    /* Background — subtle gradient for depth */
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, '#f5f5f3');
+    bg.addColorStop(1, '#eeeee9');
+    ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
     /* Zone backgrounds */
@@ -159,6 +163,50 @@ export class WorkField {
       ctx.beginPath(); ctx.moveTo(x, 8); ctx.lineTo(x, H - 20); ctx.stroke();
     }
 
+    /* Connection lines between nearby nodes */
+    const connectDist = this.large ? 60 : 45;
+    ctx.lineWidth = .5;
+    for (let i = 0; i < this.nodes.length; i++) {
+      for (let j = i + 1; j < this.nodes.length; j++) {
+        const a = this.nodes[i], b = this.nodes[j];
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < connectDist) {
+          const alpha = (1 - dist / connectDist) * .08;
+          const aActive = a.status !== 'PENDING';
+          const bActive = b.status !== 'PENDING';
+          ctx.strokeStyle = aActive || bActive
+            ? `rgba(255,77,0,${alpha * 3})`
+            : `rgba(0,0,0,${alpha})`;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    /* Ambient particles — subtle drifting dots */
+    if (!this._particles) {
+      this._particles = [];
+      for (let i = 0; i < 12; i++) {
+        this._particles.push({
+          x: Math.random() * W, y: Math.random() * H,
+          vx: (Math.random() - .5) * .15, vy: (Math.random() - .5) * .1,
+          size: 1 + Math.random() * 1.5, alpha: .03 + Math.random() * .04
+        });
+      }
+    }
+    for (const p of this._particles) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+      ctx.fillStyle = `rgba(0,0,0,${p.alpha})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
     /* Nodes — rounded rectangles */
     const sz = this.large ? 10 : 8;
     const r = 2;
@@ -169,7 +217,7 @@ export class WorkField {
       const color = COLORS[n.status] || COLORS.PENDING;
       const flashAlpha = n.flash > .05 ? n.flash : 0;
 
-      /* Flash — brief white overlay, no expanding ring */
+      /* Flash — brief white overlay */
       if (flashAlpha > .05) {
         ctx.fillStyle = `rgba(255,255,255,${flashAlpha * .6})`;
         ctx.beginPath();
@@ -192,7 +240,7 @@ export class WorkField {
         ctx.stroke();
       }
 
-      /* Frozen indicator — small purple border ring, no text */
+      /* Frozen indicator — purple border ring */
       if (n.status === 'FROZEN') {
         ctx.strokeStyle = 'rgba(123,47,214,.6)';
         ctx.lineWidth = 1.5;
