@@ -364,3 +364,60 @@
   .work-grid{grid-template-columns:repeat(auto-fill,minmax(68px,1fr))}
   .topbar{padding:.5rem .8rem}
 }
+
+/* ── Continuity Map ── */
+.ov-field{background:#0D0D0D;border:1px solid #1A1A1A;border-radius:0;
+          overflow:hidden;margin-bottom:1.5rem;position:relative}
+.ov-field canvas{display:block;width:100%;height:auto}
+
+/* ── Bottom layout ── */
+.ov-bottom{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem}
+
+/* ── Exception Panel ── */
+.ov-exception-wrap{min-height:120px}
+.exception-panel{background:#0D0D0D;border:1px solid #FF2D78;border-radius:0;padding:1rem}
+.exception-header{display:flex;align-items:baseline;gap:.75rem;margin-bottom:.5rem}
+.exception-label{font-size:.6rem;text-transform:uppercase;letter-spacing:.15em;color:#FF2D78;font-weight:700}
+.exception-iid{font-size:1.2rem;font-weight:700;color:#FFFFFF;font-family:var(--mono)}
+.exception-mode{font-size:.75rem;color:#999999;margin-bottom:1rem;font-family:var(--mono)}
+.exception-lifecycle{display:flex;align-items:center;gap:0;margin-bottom:1rem}
+.lifecycle-phase{display:flex;align-items:center;gap:.3rem}
+.phase-indicator{width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+                 font-size:.7rem;font-weight:700;color:#000;transition:all .2s}
+.lifecycle-phase.pending .phase-indicator{background:#222222;color:#555555}
+.lifecycle-phase.completed .phase-indicator{background:#1A8C3E;color:#000}
+.lifecycle-phase.active .phase-indicator{background:#9B30FF;color:#000;animation:pulseGlow 1s infinite}
+.phase-connector{width:20px;height:2px;background:#333333;margin:0 .2rem}
+.lifecycle-phase.completed + .phase-connector{background:#1A8C3E}
+.exception-status{font-size:.7rem;color:#9B30FF;font-weight:600;text-transform:uppercase;letter-spacing:.1em}
+
+/* ── Event Stream ── */
+.ov-stream{background:#0D0D0D;border:1px solid #1A1A1A;border-radius:0;overflow:hidden}
+.ov-stream .stream-header{padding:.8rem 1rem;border-bottom:1px solid #1A1A1A;
+                            font-size:.6rem;text-transform:uppercase;letter-spacing:.15em;
+                            color:#666666;font-weight:700;display:flex;justify-content:space-between}
+.stream-body{max-height:320px;overflow-y:auto;padding:0}
+.stream-event{display:flex;gap:.75rem;padding:.5rem 1rem;font-size:.7rem;font-family:var(--mono);
+              border-bottom:1px solid #111111;transition:background .2s}
+.stream-event.new{background:rgba(155,48,255,0.08)}
+.stream-event.KEEPR{border-left:2px solid #9B30FF}
+.stream-event.SYSTEM{border-left:2px solid #FF2D78}
+.stream-event.AGENT{border-left:2px solid #555555}
+.stream-event.VERIFY{border-left:2px solid #1A8C3E}
+.event-time{color:#555555;flex-shrink:0;width:70px}
+.event-entity{color:#FF2D78;font-weight:700;flex-shrink:0;width:60px}
+.event-detail{color:#CCCCCC;flex:1}
+.event-state{color:#9B30FF;font-weight:600;flex-shrink:0}
+
+/* ── Status message ── */
+.status-msg{font-size:.7rem;color:var(--ink3);font-family:var(--mono);margin-left:.5rem}
+
+/* ── Brutalist overrides ── */
+.btn{border-radius:0!important}
+.btn-primary{background:#FF2D78;border-color:#FF2D78}
+.btn-primary:hover{background:#E61A65}
+.lab-attack{border-radius:0!important}
+.lab-attack.selected{border-color:#FF2D78!important}
+.ov-q{border-radius:0!important}
+.pl-stage{border-radius:0!important}
+.wg-card{border-radius:0!important}
