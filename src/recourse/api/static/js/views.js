@@ -59,31 +59,28 @@ function handleReset() { resetWorker().then(() => refreshStatus()).catch(()=>{})
 
 async function runChunked() {
   const msg = $('#run-msg');
+  msg.textContent = 'Resetting...';
+  try {
+    await resetWorker();
+    await refreshStatus();
+    await sleep(200);
+  } catch (e) { /* proceed anyway */ }
   msg.textContent = 'Starting...';
-  let faultInjected = false;
   let processed = 0;
   try {
     while (true) {
       const s = await getStatus();
       if (s.paused) { msg.textContent = 'Paused.'; return; }
-      if (s.run_state === 'FROZEN') { msg.textContent = 'Frozen.'; return; }
+      const st = s.run_state;
+      if (st === 'FROZEN' || st === 'COMPLETED') { msg.textContent = st + '.'; return; }
       const pending = s.counts.pending || 0;
       if (pending === 0) { msg.textContent = `Complete. ${processed} processed.`; return; }
 
-      /* Auto-inject a failure on inv_007 after 5 invoices — so the demo always shows recovery */
-      if (!faultInjected && processed >= 5) {
-        faultInjected = true;
-        await injectFault('inv_007', '503');
-        msg.textContent = 'Processing... fault injected on inv_007';
-        await refreshStatus();
-        await sleep(600);
-      }
-
       msg.textContent = `Processing... ${processed + 1}/50`;
-      await runWorker(1);
+      const res = await runWorker(1);
       processed++;
       await refreshStatus();
-      await sleep(400);
+      await sleep(350);
     }
   } catch (e) { msg.textContent = 'Error: ' + e.message; }
 }
