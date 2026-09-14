@@ -146,6 +146,7 @@ export class WorkField {
 
   _drawFlow() {
     const ctx = this.ctx;
+    const W = this.W;
     ctx.strokeStyle = 'rgba(255,255,255,0.05)';
     ctx.lineWidth = 1;
     for (let i = 0; i < 5; i++) {
