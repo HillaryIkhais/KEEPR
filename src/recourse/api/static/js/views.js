@@ -390,7 +390,7 @@ export function mountAuthority() {
     </div>`;
 }
 
-export function mountEscalation() {
+export function mountEscalations() {
   const el = $('#view-escalation');
   el.innerHTML = `
     <div class="esc-hero">
@@ -532,7 +532,7 @@ export function initApp() {
   mountWork();
   mountLab();
   mountAuthority();
-  mountEscalation();
+  mountEscalations();
   mountVerification();
   refreshStatus();
   setInterval(refreshStatus, 2000);
