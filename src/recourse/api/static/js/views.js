@@ -273,7 +273,7 @@ export function mountLab() {
 async function runLabAttack(attack) {
   const resultEl = $('#lab-result-content');
   const specialEl = $('#lab-special');
-  resultEl.innerHTML = '<div class="loading-full">Running attack...</div>';
+  resultEl.innerHTML = '<div class="loading-full">RUNNING ATTACK...</div>';
   specialEl.innerHTML = '';
 
   $$('.pl-stage').forEach(s => { s.classList.remove('lit', 'pass', 'fail', 'freeze'); });
