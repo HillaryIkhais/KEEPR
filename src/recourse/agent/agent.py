@@ -1,9 +1,9 @@
 """Strands agent: investigate + propose through real tools; execution gated.
 
-Strands is the intelligence layer; RECOURSE is the control plane around it.
+Strands is the intelligence layer; KEEPR is the control plane around it.
 Credential-free mode ("stub") keeps tests/gauntlet deterministic without
 model calls. Live mode builds a real Agent with bound tools and the
-RECOURSE hook provider — the model's proposals drive recovery, the gates
+KEEPR hook provider — the model's proposals drive recovery, the gates
 decide whether anything happens.
 """
 from __future__ import annotations

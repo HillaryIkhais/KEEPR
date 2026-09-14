@@ -63,9 +63,10 @@ async function runChunked() {
   try {
     await resetWorker();
     await refreshStatus();
-    await sleep(200);
+    await sleep(100);
   } catch (e) { /* proceed anyway */ }
-  msg.textContent = 'Starting...';
+  msg.textContent = 'Processing...';
+  let faultInjected = false;
   let processed = 0;
   try {
     while (true) {
@@ -74,13 +75,22 @@ async function runChunked() {
       const st = s.run_state;
       if (st === 'FROZEN' || st === 'COMPLETED') { msg.textContent = st + '.'; return; }
       const pending = s.counts.pending || 0;
-      if (pending === 0) { msg.textContent = `Complete. ${processed} processed.`; return; }
+      if (pending === 0) { msg.textContent = `Complete. 50/50`; return; }
 
-      msg.textContent = `Processing... ${processed + 1}/50`;
+      // Auto-inject fault on inv_007 after 5 invoices for demo drama
+      if (!faultInjected && processed >= 5) {
+        faultInjected = true;
+        msg.textContent = 'FAULT: inv_007 503';
+        const res = await injectFault('inv_007', 'http_503');
+        await refreshStatus();
+        await sleep(300);
+      }
+
       const res = await runWorker(1);
-      processed++;
+      processed = 50 - pending;
+      msg.textContent = faultInjected ? `Processing... ${processed}/50 (recovering...)` : `Processing... ${processed}/50`;
       await refreshStatus();
-      await sleep(350);
+      await sleep(100);
     }
   } catch (e) { msg.textContent = 'Error: ' + e.message; }
 }

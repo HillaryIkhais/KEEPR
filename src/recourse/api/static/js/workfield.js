@@ -28,7 +28,7 @@ export class WorkField {
   }
 
   _animate() {
-    this.time += 0.016;
+    this.time += 0.04;
     this._draw();
     requestAnimationFrame(() => this._animate());
   }
@@ -99,33 +99,44 @@ export class WorkField {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.W, this.H);
     
-    /* Background */
-    ctx.fillStyle = '#000';
+    /* Background — dark */
+    ctx.fillStyle = '#0A0A0A';
     ctx.fillRect(0, 0, this.W, this.H);
 
-    /* Labels */
-    ctx.fillStyle = '#888';
-    ctx.font = '12px JetBrains Mono';
-    ctx.fillText('QUEUE', 40, 40);
-    ctx.fillText('FETCHING', this.W * 0.28, 40);
-    ctx.fillText('KEEPING', this.W * 0.56, 40);
-    ctx.fillText('VERIFY', this.W * 0.82, 40);
-    ctx.fillText('VERIFIED', this.W - 80, 40);
+    /* Zone labels */
+    ctx.fillStyle = '#888888';
+    ctx.font = 'bold 13px JetBrains Mono';
+    ctx.fillText('QUEUE', 40, 45);
+    ctx.fillText('FETCHING', this.W * 0.28, 45);
+    ctx.fillText('KEEPING', this.W * 0.56, 45);
+    ctx.fillText('VERIFY', this.W * 0.82, 45);
+    ctx.fillText('VERIFIED', this.W - 90, 45);
+
+    /* Separator lines */
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1;
+    for (let i = 1; i < 5; i++) {
+      const x = this.W * (0.15 + i * 0.17);
+      ctx.beginPath();
+      ctx.moveTo(x, 60);
+      ctx.lineTo(x, this.H - 40);
+      ctx.stroke();
+    }
 
     /* Nodes */
     for (const n of this.nodes) {
       const targetX = this._targetX(n.idx, n.status);
       const targetY = this._targetY(n.status, n.idx);
       
-      n.x += (targetX - n.x) * 0.15;
-      n.y += (targetY - n.y) * 0.15;
+      n.x += (targetX - n.x) * 0.25;
+      n.y += (targetY - n.y) * 0.25;
 
       const colors = {
-        PENDING: '#888888',
+        PENDING: '#7A7A7A',
         PROCESSING: '#FF4D00',
         KEEPR: '#7B2FD6',
         VERIFIED: '#00B050',
-        RECOVERED: '#00B050',
+        RECOVERED: '#00FF88',
         ESCALATED: '#FFB000',
         FROZEN: '#FF003C'
       };
@@ -133,21 +144,18 @@ export class WorkField {
 
       ctx.fillStyle = color;
       ctx.beginPath();
-      ctx.roundRect(n.x - 6, n.y - 6, 12, 12, 2);
+      ctx.roundRect(n.x - 8, n.y - 8, 16, 16, 3);
       ctx.fill();
 
-      if (n.status === 'KEEPR' || n.status === 'FROZEN') {
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
+      /* Glow for active states */
+      if (n.status === 'KEEPR' || n.status === 'PROCESSING') {
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.roundRect(n.x - 8, n.y - 8, 16, 16, 2);
-        ctx.stroke();
+        ctx.roundRect(n.x - 10, n.y - 10, 20, 20, 3);
+        ctx.fill();
+        ctx.shadowBlur = 0;
       }
-
-      ctx.fillStyle = '#FFF';
-      ctx.font = '8px JetBrains Mono';
-      ctx.textAlign = 'center';
-      ctx.fillText(n.iid.split('_')[1], n.x, n.y + 3);
-    }
   }
 }

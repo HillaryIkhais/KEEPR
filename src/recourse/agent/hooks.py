@@ -1,4 +1,4 @@
-"""Strands BeforeToolCall hook: side-effecting tools require RECOURSE auth.
+"""Strands BeforeToolCall hook: side-effecting tools require KEEPR auth.
 
 Agent attempts forbidden action -> hook -> scope check -> CANCELLED
 before the tool body ever runs. The coordinator re-enforces the same

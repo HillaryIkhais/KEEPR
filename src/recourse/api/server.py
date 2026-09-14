@@ -1,4 +1,4 @@
-"""RECOURSE API server.
+"""KEEPR API server.
 
 Boots the authoritative ledger (real external system) on a background thread
 when started via `uvicorn recourse.api.server:app`.  This ensures the hero

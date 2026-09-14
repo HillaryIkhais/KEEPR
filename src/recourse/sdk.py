@@ -1,4 +1,4 @@
-"""RECOURSE SDK — the adoptable surface.
+"""KEEPR SDK — the adoptable surface.
 
 Two entry points:
 

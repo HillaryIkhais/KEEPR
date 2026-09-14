@@ -1,4 +1,4 @@
-"""RECOURSE API routes — thin HTTP layer over the control plane.
+"""KEEPR API routes — thin HTTP layer over the control plane.
 
 All authority decisions live in core/recovery/verification; routes only
 record transitions and persist the audit trail.

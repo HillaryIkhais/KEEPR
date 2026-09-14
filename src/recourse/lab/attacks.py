@@ -1,4 +1,4 @@
-"""RECOURSE failure/security lab — 8 injectable attacks.
+"""KEEPR failure/security lab — 8 injectable attacks.
 
 Each attack builds a deterministic world, runs it through the recovery
 runtime, and returns {name, passed, timeline, detail}. The demo script
